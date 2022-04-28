@@ -7,8 +7,8 @@ def create_app():
     app = Flask(__name__)
 
     flask_config.init_app(app)
-    # database
-    # migrate
+    database.init_app(app)
+    migrate.init_app(app)
     routes.init_app(app)
 
     return app
