@@ -1,6 +1,9 @@
 from app.configs.database import db
 from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy.orm import validates
 from dataclasses import dataclass
+import re
+from app.exceptions.users_exceptions import PhoneExc, CPFExc
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -25,6 +28,26 @@ class UserModel(db.Model):
     birthdate = Column(Date, nullable = True)
     password_hash = Column(String(511), nullable = False, unique = True)
 
+
+    @validates("phone")
+    def validate_phone(self, key, value):
+        reg = re.findall("^\(\d{2}\)\d{5}-\d{4}$", value)
+
+        if(reg):
+            return reg[0]
+        else:
+            raise PhoneExc("Phone Format must be: (41)99999-9999")
+
+
+    @validates("cpf")
+    def validate_cpf(self, key, value):
+        reg = re.findall("\d{3}.\d{3}.\d{3}-\d{2}$", value)
+
+        if(reg):
+            return reg[0]
+        else:
+            raise CPFExc("CPF Format must be: 111.222.333-44")
+        
 
     @property
     def password(self):

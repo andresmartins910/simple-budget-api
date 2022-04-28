@@ -9,4 +9,4 @@ def init_app(app: Flask):
     app.db = db
 
     from app.models.users_model import UserModel
-    from app.models.expenses_model import ExpensesModel
+    # from app.models.expenses_model import ExpensesModel

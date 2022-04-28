@@ -1,6 +1,7 @@
 from flask import request, jsonify, current_app
 from app.models.users_model import UserModel
 from sqlalchemy.exc import IntegrityError
+from app.exceptions.users_exceptions import CPFExc, PhoneExc
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
@@ -74,6 +75,16 @@ def create_user():
 
         return jsonify(serialized), 201
 
+    except PhoneExc as e:
+        return {
+            "error": e.args[0]
+        }, 400
+
+    except CPFExc as e:
+        return {
+            "error": e.args[0]
+        }, 400
+
     except IntegrityError as e:
         if("email" in e.args[0]):
             return {"error": "EMAIL already exists"}, 400
@@ -123,7 +134,16 @@ def update_user():
         current_app.db.session.add(get_user)
         current_app.db.session.commit()
 
-        return jsonify(get_user), 200
+        serialized = {
+            "id": get_user.id,
+            "name": get_user.name,
+            "email": get_user.email,
+            "phone": get_user.phone,
+            "cpf": get_user.cpf,
+            "birthdate": get_user.birthdate
+        }
+
+        return jsonify(serialized), 200
 
     except: 
         return {
