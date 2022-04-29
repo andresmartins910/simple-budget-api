@@ -6,7 +6,7 @@ db = SQLAlchemy()
 def init_app(app: Flask):
 
     db.init_app(app)
+
     app.db = db
 
-    #from app import models
-    from app.models import BudgetModel
+    import app.models
