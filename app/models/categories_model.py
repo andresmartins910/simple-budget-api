@@ -7,9 +7,10 @@ from sqlalchemy.orm import validates
 
 @dataclass
 class CategoryModel(db.Model):
+
     id : int
-    name = str
-    description = str
+    name : str
+    description : str
 
 
     __tablename__ = "category"
