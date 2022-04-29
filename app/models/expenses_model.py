@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ExpensesModel(db.Model):
+class ExpenseModel(db.Model):
     id: int
     name: str
     description: str
@@ -22,4 +22,4 @@ class ExpensesModel(db.Model):
     category_id = Column(Integer, ForeignKey("category.id"))
 
     budget = db.relationship("BudgetModel", backref="expense")
-    category = db.relationship("CategoriesModel", backref="expense")
+    category = db.relationship("CategoryModel", backref="expense")
