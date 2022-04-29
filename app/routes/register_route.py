@@ -1,10 +1,11 @@
 from flask import Blueprint
-from app.controllers.users_controller import user_info, create_user, update_user, delete_user
+
+from app.controllers import users_controller
 
 
-bp = Blueprint("register_bp", __name__, url_prefix="/register")
+bp = Blueprint("user_bp", __name__, url_prefix="/user")
 
-bp.get("")(user_info)
-bp.post("")(create_user)
-bp.patch("")(update_user)
-bp.delete("")(delete_user)
+bp.get("")(users_controller.user_info)
+bp.post("")(users_controller.create_user)
+bp.patch("")(users_controller.update_user)
+bp.delete("")(users_controller.delete_user)
