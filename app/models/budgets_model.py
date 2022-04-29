@@ -11,7 +11,7 @@ class BudgetModel(db.Model):
     year: str
     max_value: int
     user_id: int
-    
+
     __tablename__ = "budget"
 
     id = Column(Integer, primary_key= True)
