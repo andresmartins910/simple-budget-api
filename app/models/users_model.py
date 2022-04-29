@@ -16,7 +16,7 @@ class UserModel(db.Model):
     phone: str
     cpf: str
     birthdate: str
-    password_hash: str
+
 
     __tablename__ = "user"
 
@@ -47,13 +47,13 @@ class UserModel(db.Model):
             return reg[0]
         else:
             raise CPFExc("CPF Format must be: 111.222.333-44")
-        
+
 
     @property
     def password(self):
         raise AttributeError("Password cannot be accessed")
 
-    
+
     @password.setter
     def password(self, password_to_hash):
         self.password_hash = generate_password_hash(password_to_hash)

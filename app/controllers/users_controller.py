@@ -47,7 +47,7 @@ def create_user():
     if(wrong_keys):
         return {
             "allowed_keys": allowed_keys,
-            "wrong_keys": wrong_keys 
+            "wrong_keys": wrong_keys
         }, 400
 
     if(missing_keys):
@@ -61,7 +61,7 @@ def create_user():
         send_data = UserModel(**data)
 
         send_data.password = password_to_hash
-    
+
         current_app.db.session.add(send_data)
         current_app.db.session.commit()
 
@@ -145,7 +145,7 @@ def update_user():
 
         return jsonify(serialized), 200
 
-    except: 
+    except:
         return {
             "error": "Server Error!"
         }, 400
@@ -172,7 +172,7 @@ def delete_user():
         return {
             "error": "User doesn't exists"
         }, 400
-    
+
 
 def login():
     data = request.get_json()
@@ -185,7 +185,7 @@ def login():
         if(i not in data.keys()):
             missing_keys.append(i)
 
-    
+
     for i in data.keys():
         if(i not in allowed_keys):
             wrong_keys.append(i)
@@ -197,15 +197,15 @@ def login():
             "missing_keys": missing_keys
         }, 400
 
-    
+
     if(wrong_keys):
         return {
             "wrong_keys": wrong_keys
         }, 400
 
+    user = UserModel.query.filter_by(email = data["email"]).first()
+
     try:
-        user = UserModel.query.filter_by(email = data["email"]).first()
-        
         if(user and user.verify_password(data["password"])):
             token = create_access_token(user)
 
