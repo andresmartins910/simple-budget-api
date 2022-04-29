@@ -5,8 +5,9 @@ db = SQLAlchemy()
 
 
 def init_app(app: Flask):
+
     db.init_app(app)
+
     app.db = db
 
-    from app.models.users_model import UserModel
-    # from app.models.expenses_model import ExpensesModel
+    import app.models
