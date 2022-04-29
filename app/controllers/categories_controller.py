@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from app.models.categories_model import CategoryModel
 from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -9,6 +10,8 @@ from werkzeug.exceptions import NotFound
 
 TRUSTED_CATEGORY_KEYS = ['name', 'description']
 
+
+@jwt_required()
 def create_category():
 
     data = request.get_json()
@@ -34,6 +37,7 @@ def create_category():
     return jsonify(new_category), HTTPStatus.CREATED
 
 
+@jwt_required()
 def update_category(category_id: int):
 
     session: Session = current_app.db.session
@@ -58,7 +62,7 @@ def update_category(category_id: int):
 
     return jsonify(category), HTTPStatus.OK
 
-
+@jwt_required()
 def list_categories():
 
     query = CategoryModel.query.all()

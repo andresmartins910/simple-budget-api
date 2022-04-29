@@ -21,5 +21,5 @@ class ExpenseModel(db.Model):
     budget_id = Column(Integer, ForeignKey("budget.id"))
     category_id = Column(Integer, ForeignKey("category.id"))
 
-    budget = db.relationship("BudgetModel", backref="expense")
-    category = db.relationship("CategoryModel", backref="expense")
+    budget = db.relationship("BudgetModel", backref="expenses")
+    category = db.relationship("CategoryModel", backref="expenses")
