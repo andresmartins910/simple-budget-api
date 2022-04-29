@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-   Url base da API: 
+   Url base da API: https://simple-budget-api.herokuapp.com/
 </p>
 
 <h2 align ='center'> Users </h2>
