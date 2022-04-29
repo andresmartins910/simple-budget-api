@@ -1,10 +1,10 @@
 from flask import Blueprint
 
-from app.controllers.expenses_controller import add_expense, get_expense, update_expense, del_expense
+from app.controllers import expenses_controller
 
 bp = Blueprint("expenses_bp", __name__, url_prefix="/expenses")
 
-bp.get("<id>")(get_expense)
-bp.post("")(add_expense)
-bp.patch("<id>")(update_expense)
-bp.delete("<id>")(del_expense)
+bp.get("")(expenses_controller.get_expense)
+bp.post("")(expenses_controller.add_expense)
+bp.patch("<int:expense_id>")(expenses_controller.update_expense)
+bp.delete("<int:expense_id>")(expenses_controller.del_expense)
