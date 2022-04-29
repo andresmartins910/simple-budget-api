@@ -1,5 +1,5 @@
 from app.configs.database import db
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float
+from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, DateTime
 from dataclasses import dataclass
 
 
@@ -17,9 +17,9 @@ class ExpenseModel(db.Model):
     name = Column(String(45), nullable=False)
     description = Column(String(45), nullable=True)
     created_at = Column(DateTime, nullable=False)
-    amount = Column(Float(100, 2), nullable=False)
+    amount = Column(Numeric(10, 2), nullable=False)
     budget_id = Column(Integer, ForeignKey("budget.id"))
     category_id = Column(Integer, ForeignKey("category.id"))
 
-    budget = db.relationship("BudgetModel", backref="expense")
-    category = db.relationship("CategoryModel", backref="expense")
+    budget = db.relationship("BudgetModel", backref="expenses")
+    category = db.relationship("CategoryModel", backref="expenses")
