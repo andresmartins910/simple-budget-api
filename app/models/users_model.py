@@ -55,7 +55,9 @@ class UserModel(db.Model):
         if value != datetime.strptime(value, "%d/%m/%Y").strftime("%d/%m/%Y"):
             raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
 
-        return value
+        date = datetime.strptime(value, "%d/%m/%Y")
+
+        return date
 
     @property
     def password(self):
