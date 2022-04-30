@@ -1,7 +1,7 @@
 from flask import request, jsonify, current_app
 from app.models.users_model import UserModel
 from sqlalchemy.exc import IntegrityError
-from app.exceptions.users_exceptions import CPFExc, PhoneExc
+from app.exceptions.users_exceptions import CPFExc, PhoneExc, BirthdateExc
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
@@ -81,6 +81,11 @@ def create_user():
         }, 400
 
     except CPFExc as e:
+        return {
+            "error": e.args[0]
+        }, 400
+
+    except BirthdateExc as e:
         return {
             "error": e.args[0]
         }, 400
