@@ -52,10 +52,13 @@ class UserModel(db.Model):
     @validates("birthdate")
     def validate_birthdate(self, key, value):
 
-        if not datetime.strptime(value, "%d/%m/%Y") or value != datetime.strptime(value, "%d/%m/%Y").strftime("%d/%m/%Y"):
-            raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
+        # if not datetime.strptime(value, "%d/%m/%Y") or value != datetime.strptime(value, "%d/%m/%Y").strftime("%d/%m/%Y"):
+        #     raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
 
-        date = datetime.strptime(value, "%d/%m/%Y")
+        try:
+            date = datetime.strptime(value, "%d/%m/%Y")
+        except:
+            raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
 
         return date
 
