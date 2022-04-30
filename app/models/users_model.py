@@ -1,3 +1,4 @@
+from time import strptime
 from app.configs.database import db
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import validates
@@ -55,7 +56,9 @@ class UserModel(db.Model):
         if value != datetime.strptime(value, "%d/%m/%Y").strftime("%d/%m/%Y"):
             raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
 
-        return value
+        date = strptime(value, "%d/%m/%Y")
+
+        return date
 
     @property
     def password(self):
