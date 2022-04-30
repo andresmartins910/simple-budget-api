@@ -4,3 +4,6 @@ class PhoneExc(Exception):
 
 class CPFExc(Exception):
     pass
+
+class BirthdateExc(Exception):
+    pass
