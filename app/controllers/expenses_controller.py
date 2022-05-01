@@ -53,8 +53,18 @@ def add_expense():
     except IntegrityError as err:
         if type(err.orig).__name__ == "UniqueViolation":
             return {"error": "Unique Violation"}, HTTPStatus.CONFLICT
+    
+    serialized = {
+            "id": expense.id,
+	        "name": expense.name,
+	        "description": expense.description,
+	        "amount": expense.amount,
+            "created_at": expense.created_at,
+            "budget_id": expense.budget_id,
+	        # "user_id": expense.user_id,
+        }
 
-    return {"msg": "deu certo"}, HTTPStatus.CREATED
+    return jsonify(serialized), HTTPStatus.CREATED
 
 
 @jwt_required()
