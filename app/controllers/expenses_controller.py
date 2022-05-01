@@ -1,6 +1,5 @@
 from http import HTTPStatus
 from flask import request, jsonify
-from ipdb import set_trace
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, Query
@@ -53,7 +52,7 @@ def add_expense():
     except IntegrityError as err:
         if type(err.orig).__name__ == "UniqueViolation":
             return {"error": "Unique Violation"}, HTTPStatus.CONFLICT
-    
+
     serialized = {
             "id": expense.id,
 	        "name": expense.name,
