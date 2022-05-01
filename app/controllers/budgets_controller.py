@@ -1,3 +1,4 @@
+from datetime import datetime
 from http import HTTPStatus
 
 from app.configs.database import db
@@ -11,33 +12,40 @@ from sqlalchemy.orm.session import Session
 from werkzeug.exceptions import NotFound
 
 
-@jwt_required()
+#@jwt_required()
 def get_budgets():
 
     budgets = BudgetModel.query.all()
 
     return jsonify(budgets), HTTPStatus.OK
 
-@jwt_required()
+#@jwt_required()
 def create_budget():
-
     session: Session = db.session()
     data = request.get_json()
 
     try:
-        data["month"] = data["month"].title()
+        data['month_year'] = datetime.strptime(data['month_year'], "%m/%Y").strftime("%m/%Y")
+        
         budget = BudgetModel(**data)
 
         session.add(budget)
         session.commit()
+        
+        return jsonify(budget), HTTPStatus.CREATED
 
-        return jsonify(budget), 201
+    except ValueError:
+        return jsonify({"error": "Field 'month_year' must be format: mm/YYYY"}), HTTPStatus.BAD_REQUEST
 
     except IntegrityError as e:
         if type(e.orig) == UniqueViolation:
-            return {"error": "Budget already exists"}, 409
+            
+            return {
+                "error": "Budget already exists", 
+                "description": "You can only have one budget per month, each year"
+            }, HTTPStatus.CONFLICT
 
-@jwt_required()
+#@jwt_required()
 def update_budget(budget_id):
 
     session: Session = db.session
@@ -57,8 +65,7 @@ def update_budget(budget_id):
 
     budget_return = {
         "id": budget.id,
-        "month": budget.month,
-        "year": budget.year,
+        "month_year": budget.month_year,
         "max_value": budget.max_value,
         "user": budget.user.name,
         "expenses": [expense.name for expense in budget.expenses]
@@ -66,7 +73,7 @@ def update_budget(budget_id):
 
     return jsonify(budget_return), HTTPStatus.OK
 
-@jwt_required()
+#@jwt_required()
 def delete_budget(budget_id):
 
     session: Session = db.session
