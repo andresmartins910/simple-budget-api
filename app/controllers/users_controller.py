@@ -31,8 +31,16 @@ def create_user():
     data = request.get_json()
 
     allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
+    nullable_keys = ["cpf", "birthdate"]
+    denied_nullable_keys = []
     wrong_keys = []
     missing_keys = []
+
+
+    for i in nullable_keys:
+        if(i not in data.keys()):
+            denied_nullable_keys.append(i)
+
 
     for i in data.keys():
         if(i not in allowed_keys):
@@ -40,7 +48,7 @@ def create_user():
 
 
     for i in allowed_keys:
-        if(i not in data.keys()):
+        if(i not in data.keys() and i not in denied_nullable_keys):
             missing_keys.append(i)
 
 
