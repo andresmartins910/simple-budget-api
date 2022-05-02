@@ -121,6 +121,7 @@ def budget_expenses(budget_id):
 @jwt_required()
 def update_expense(expense_id):
     data = request.get_json()
+    current_user = get_jwt_identity()
     trusted_update_keys = ['name','description','amount']
     try:
         verify_allowed_keys(data, trusted_update_keys)
@@ -152,8 +153,9 @@ def update_expense(expense_id):
         "description": expense.description,
         "amount": expense.amount,
         "created_at": expense.created_at,
-        "category_id": expense.category_id,
-        "budget_id": expense.budget_id
+        "category_id":  expense.category.name,
+        "budget_id": expense.budget_id,
+        "user_id": current_user['id']
     }, HTTPStatus.OK
 
 
