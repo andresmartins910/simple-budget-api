@@ -105,6 +105,18 @@ def get_expense(expense_id):
     return jsonify(expense), HTTPStatus.OK
 
 
+def budget_expenses(budget_id):
+    session: Session = db.session
+    budget = session.query(BudgetModel).filter(BudgetModel.id == budget_id).first()
+    if not budget:
+        return {"error": "budget not found"}, HTTPStatus.NOT_FOUND
+    expenses = budget.expenses
+    if expenses == []:
+        return {"msg": "whitout expenses in this budget please create one"}, HTTPStatus.OK
+    
+    return jsonify(expenses), 200
+
+
 @jwt_required()
 def update_expense(expense_id):
     data = request.get_json()
