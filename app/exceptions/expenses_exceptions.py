@@ -1,0 +1,2 @@
+class ValuesTypeError(TypeError):
+    pass

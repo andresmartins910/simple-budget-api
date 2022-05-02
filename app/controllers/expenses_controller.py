@@ -1,15 +1,17 @@
 from http import HTTPStatus
 from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from sqlalchemy.exc import IntegrityError, NoResultFound
+from sqlalchemy.exc import IntegrityError, NoResultFound, DataError
 from sqlalchemy.orm import Session, Query
 from datetime import datetime as dt
 from app.configs.database import db
+from app.exceptions.expenses_exceptions import ValuesTypeError
 from app.models.budgets_model import BudgetModel
 from app.models.categories_model import CategoryModel
 from app.models.expenses_model import ExpenseModel
 from app.models.users_model import UserModel
 from app.services import verify_allowed_keys, verify_required_keys
+from app.services.expense_service import verify_update_type, verify_value_types
 
 
 @jwt_required()
@@ -29,8 +31,8 @@ def all_expenses():
                 "description": expense.description,
                 "amount": expense.amount,
                 "created_at": expense.created_at,
-                "budget_id": expense.budget_id,
-                "user_id": current_user['id']
+                "budget_month_year": budget.month_year,
+                "budget_id": budget.id
             }
             list_expense.append(new_expense)
 
@@ -40,14 +42,38 @@ def all_expenses():
 @jwt_required()
 def add_expense():
     data = request.get_json()
-    trusted_expense_keys = ['name','description','amount','category_id','budget_id']
+    trusted_expense_keys = ['name','amount','category_id','budget_id']
+    allowed_keys = ['name','amount', 'description','category_id','budget_id']
     try:
         verify_required_keys(data, trusted_expense_keys)
-    
+        verify_allowed_keys(data, allowed_keys)
+        verify_value_types(data)
     except KeyError as e:
         return jsonify(e.args), HTTPStatus.BAD_REQUEST
-
+    except ValuesTypeError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
+    
     session: Session = db.session
+    
+    budget_found = session.query(BudgetModel).filter(BudgetModel.id == data['budget_id']).one_or_none()
+    if not budget_found:
+        return {
+            "error": "Budget not exist"
+        }, HTTPStatus.NOT_FOUND
+    
+    category_found = session.query(BudgetModel).filter(BudgetModel.id == data['category_id']).one_or_none()
+    if not category_found:
+        return {
+            "error": "Category not exist"
+        }, HTTPStatus.NOT_FOUND
+
+    expense_name = [expense.name for expense in budget_found.expenses if expense.name not in budget_found.expenses]
+    if data['name'] in expense_name:
+        return {
+            "error": "Expense already exists",
+            "description": "You can only have one expense per budget"
+        }, HTTPStatus.CONFLICT
+
     try:
         data['created_at'] = dt.now()
         expense = ExpenseModel(**data)
@@ -56,8 +82,6 @@ def add_expense():
     except IntegrityError as err:
         if type(err.orig).__name__ == "UniqueViolation":
             return {"error": "Unique Violation"}, HTTPStatus.CONFLICT
-    # except (Exception):
-        # raise TypeError
 
     serialized = {
             "id": expense.id,
@@ -87,8 +111,11 @@ def update_expense(expense_id):
     trusted_update_keys = ['name','description','amount']
     try:
         verify_allowed_keys(data, trusted_update_keys)
+        verify_update_type(data)
 
     except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
+    except ValuesTypeError as e:
         return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
     session: Session = db.session
@@ -100,8 +127,11 @@ def update_expense(expense_id):
     for key, value in data.items():
         setattr(expense, key, value)
 
-    # TODO: try/except
-    session.commit()
+    try:
+        session.commit()
+    except DataError as err:
+        if type(err.orig).__name__ == "InvalidTextRepresentation":
+            return {"error": "amount must be of type integer"}
 
     return {
         "id": expense.id,
@@ -121,7 +151,6 @@ def del_expense(expense_id):
     if not expense:
         return {"error": "expense not found"}, HTTPStatus.NOT_FOUND
 
-    # TODO: try/except
     session.delete(expense)
     session.commit()
 
