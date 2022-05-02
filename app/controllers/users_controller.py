@@ -42,7 +42,7 @@ def create_user():
         verify_allowed_keys(data, allowed_keys)
         
     except KeyError as e:
-        return jsonify(e.args)
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
 
     try:
@@ -80,7 +80,6 @@ def create_user():
             "error": e.args[0]
         }, HTTPStatus.BAD_REQUEST
 
-
     except IntegrityError as e:
         if("email" in e.args[0]):
             return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
@@ -102,7 +101,7 @@ def update_user():
         verify_allowed_keys(data, allowed_keys)
 
     except KeyError as e:
-        return jsonify(e.args)
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
 
     try:
