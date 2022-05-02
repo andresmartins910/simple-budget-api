@@ -1,8 +1,11 @@
 from flask import request, jsonify, current_app
+from http import HTTPStatus
 from app.models.users_model import UserModel
 from sqlalchemy.exc import IntegrityError
 from app.exceptions.users_exceptions import CPFExc, PhoneExc, BirthdateExc
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from datetime import timedelta
+from app.services import verify_allowed_keys, verify_required_keys
 
 
 @jwt_required()
@@ -20,48 +23,26 @@ def user_info():
             "cpf": get_user.cpf,
             "birthdate": get_user.birthdate,
         }
-        return jsonify(serialized), 200
+        return jsonify(serialized), HTTPStatus.OK
 
     return {
         "error": "User doesn't exists"
-    }, 404
+    }, HTTPStatus.NOT_FOUND
 
 
 def create_user():
     data = request.get_json()
 
+    trusted_keys = ["name", "email", "phone", "password"]
     allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
-    nullable_keys = ["cpf", "birthdate"]
-    denied_nullable_keys = []
-    wrong_keys = []
-    missing_keys = []
 
 
-    for i in nullable_keys:
-        if(i not in data.keys()):
-            denied_nullable_keys.append(i)
+    try:
+        verify_required_keys(data, trusted_keys)
+        verify_allowed_keys(data, allowed_keys)
 
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
-
-
-    for i in allowed_keys:
-        if(i not in data.keys() and i not in denied_nullable_keys):
-            missing_keys.append(i)
-
-
-    if(wrong_keys):
-        return {
-            "allowed_keys": allowed_keys,
-            "wrong_keys": wrong_keys
-        }, 400
-
-    if(missing_keys):
-        return {
-            "missing_keys": missing_keys
-        }, 400
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
     try:
         password_to_hash = data.pop("password")
@@ -81,30 +62,30 @@ def create_user():
             "birthdate": send_data.birthdate
         }
 
-        return jsonify(serialized), 201
+        return jsonify(serialized), HTTPStatus.CREATED
 
     except PhoneExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     except CPFExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     except BirthdateExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     except IntegrityError as e:
         if("email" in e.args[0]):
-            return {"error": "EMAIL already exists"}, 400
+            return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
         if("password_hash" in e.args[0]):
-            return {"error": "PASSWORD already exists"}, 400
+            return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
         if("phone" in e.args[0]):
-            return {"error": "PHONE already exists"}, 400
+            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -113,24 +94,13 @@ def update_user():
 
     user = get_jwt_identity()
 
-    allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password_hash"]
-    wrong_keys = []
+    allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
 
-    if(len(data) == 0):
-        return {
-            "allowed_keys": allowed_keys
-        }
+    try:
+        verify_allowed_keys(data, allowed_keys)
 
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
-
-
-    if(wrong_keys):
-        return {
-            "wrong_keys": wrong_keys
-        }, 400
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
 
     try:
@@ -139,7 +109,7 @@ def update_user():
         if(get_user == None):
             return {
                 "error": "User not found"
-            }, 404
+            }, HTTPStatus.NOT_FOUND
 
         for key, value in data.items():
             setattr(get_user, key, value)
@@ -156,12 +126,30 @@ def update_user():
             "birthdate": get_user.birthdate
         }
 
-        return jsonify(serialized), 200
+        return jsonify(serialized), HTTPStatus.OK
 
-    except:
+    except CPFExc as e:
         return {
-            "error": "Server Error!"
-        }, 400
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
+
+    except PhoneExc as e:
+        return {
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
+
+    except BirthdateExc as e:
+        return {
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
+
+    except IntegrityError as e:
+        if("email" in e.args[0]):
+            return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
+        if("password_hash" in e.args[0]):
+            return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
+        if("phone" in e.args[0]):
+            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -175,62 +163,46 @@ def delete_user():
             current_app.db.session.delete(serialized_user)
             current_app.db.session.commit()
 
-            return "", 200
+            return "", HTTPStatus.OK
 
         return {
             "error": "Server Error"
-        }, 500
+        }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     except:
         return {
             "error": "User doesn't exists"
-        }, 400
+        }, HTTPStatus.NOT_FOUND
 
 
 def login():
     data = request.get_json()
 
+    trusted_keys = ["email", "password"]
     allowed_keys = ["email", "password"]
-    missing_keys = []
-    wrong_keys = []
 
-    for i in allowed_keys:
-        if(i not in data.keys()):
-            missing_keys.append(i)
+    try:
+        verify_required_keys(data, trusted_keys)
+        verify_allowed_keys(data, allowed_keys)
 
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
-
-
-    if(missing_keys):
-        return {
-            "allowed_keys": allowed_keys,
-            "missing_keys": missing_keys
-        }, 400
-
-
-    if(wrong_keys):
-        return {
-            "wrong_keys": wrong_keys
-        }, 400
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
     user = UserModel.query.filter_by(email = data["email"]).first()
 
     try:
         if(user and user.verify_password(data["password"])):
-            token = create_access_token(user)
+            token = create_access_token(user, expires_delta=timedelta(hours=24))
 
             return {
                 "access_token": token
-            }, 200
+            }, HTTPStatus.OK
 
         return {
-            "error": "email or password doesn't matches"
-        }, 404
+            "error": "Email or Password doesn't matches"
+        }, HTTPStatus.NOT_FOUND
 
     except:
         return {
             "error": "Error"
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
