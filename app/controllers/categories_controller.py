@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from turtle import title
 
 from app.models.categories_model import CategoryModel
 from app.services import verify_allowed_keys, verify_required_keys
@@ -7,7 +6,6 @@ from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import or_
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import NotFound
 
