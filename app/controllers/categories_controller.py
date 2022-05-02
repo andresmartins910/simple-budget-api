@@ -81,6 +81,8 @@ def update_category(category_id: int):
                                         .one_or_none()
     )
 
+    if category.created_by == 'ADM':
+        return {"msg": "User can't update default categories!"}, HTTPStatus.BAD_REQUEST
     if category_in_user_found:
         return {"msg": "Category already exists!"}, HTTPStatus.CONFLICT
 
@@ -117,12 +119,11 @@ def delete_category(category_id: int):
 
     try:
         category: BaseQuery = (session.query(CategoryModel)
-                                    .filter(or_(CategoryModel.created_by == 'ADM',
-                                                CategoryModel.created_by == str(current_user['id'])))
+                                    .filter(CategoryModel.created_by == str(current_user['id']))
                                     .filter_by(id=category_id)
                                     .one()
     )
-    except NotFound as err:
+    except:
         return {"msg": "Category not found!"}, HTTPStatus.NOT_FOUND
 
     session.delete(category)
