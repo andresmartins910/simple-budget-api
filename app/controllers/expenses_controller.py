@@ -105,6 +105,7 @@ def get_expense(expense_id):
     return jsonify(expense), HTTPStatus.OK
 
 
+@jwt_required()
 def budget_expenses(budget_id):
     session: Session = db.session
     budget = session.query(BudgetModel).filter(BudgetModel.id == budget_id).first()
