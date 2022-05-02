@@ -36,7 +36,7 @@ def add_expense():
     data = request.get_json() # name, amount, description?
     session: Session = db.session
     try:
-        data['created_at'] = dt.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['created_at'] = dt.now()
         category_request = data.pop('category')
         category: CategoryModel = session.query(CategoryModel).filter(CategoryModel.name == category_request).first()
         data['category_id'] = category.id
