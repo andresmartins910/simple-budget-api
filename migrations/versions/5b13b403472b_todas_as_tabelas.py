@@ -47,16 +47,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.execute(
-        "INSERT INTO \
-            category (name, description) \
-         VALUES \
-             ('Food', 'Food related expenses'),\
-             ('Entertainment', 'Entertainment related expenses'),\
-             ('Transport', 'Transport related expenses'),\
-             ('Home', 'Home related expenses'),\
-             ('Health', 'Health related expenses')"
-    )
     # ### end Alembic commands ###
 
 def downgrade():
