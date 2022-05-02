@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from turtle import title
 
 from app.models.categories_model import CategoryModel
 from app.services import verify_allowed_keys, verify_required_keys
@@ -29,6 +30,17 @@ def create_category():
 
     data['created_by'] = str(current_user['id'])
 
+    session: Session = current_app.db.session
+    base_query: BaseQuery = session.query(CategoryModel)
+    category_in_user_found = (base_query.filter(or_(CategoryModel.created_by == 'ADM',
+                                                   CategoryModel.created_by == str(current_user['id'])))
+                                        .filter(CategoryModel.name == data['name'].title())
+                                        .one_or_none()
+    )
+
+    if category_in_user_found:
+        return {"msg": "Category already exists!"}, HTTPStatus.CONFLICT
+
     try:
         new_category = CategoryModel(**data)
     except TypeError as err:
@@ -36,17 +48,16 @@ def create_category():
 
     session: Session = current_app.db.session()
 
-    try:
-        session.add(new_category)
-        session.commit()
-    except IntegrityError:
-        return {"msg": "Category already exists!"}, HTTPStatus.CONFLICT
+    session.add(new_category)
+    session.commit()
 
     return jsonify(new_category), HTTPStatus.CREATED
 
 
 @jwt_required()
 def update_category(category_id: int):
+
+    current_user = get_jwt_identity()
 
     session: Session = current_app.db.session
     base_query: BaseQuery = session.query(CategoryModel)
@@ -63,6 +74,17 @@ def update_category(category_id: int):
         verify_allowed_keys(data, ALLOWED_CATEGORY_KEYS)
     except KeyError as err:
         return jsonify(err.args[0]), HTTPStatus.BAD_REQUEST
+
+    session: Session = current_app.db.session
+    base_query: BaseQuery = session.query(CategoryModel)
+    category_in_user_found = (base_query.filter(or_(CategoryModel.created_by == 'ADM',
+                                                   CategoryModel.created_by == str(current_user['id'])))
+                                        .filter(CategoryModel.name == data['name'].title())
+                                        .one_or_none()
+    )
+
+    if category_in_user_found:
+        return {"msg": "Category already exists!"}, HTTPStatus.CONFLICT
 
     for key, value in data.items():
         setattr(category, key, value)
@@ -91,13 +113,19 @@ def list_categories():
 @jwt_required()
 def delete_category(category_id: int):
 
+    current_user = get_jwt_identity()
+
     session: Session = current_app.db.session
-    base_query: BaseQuery = session.query(CategoryModel)
 
     try:
-        category = base_query.get_or_404(category_id, description="Category not found!")
+        category: BaseQuery = (session.query(CategoryModel)
+                                    .filter(or_(CategoryModel.created_by == 'ADM',
+                                                CategoryModel.created_by == str(current_user['id'])))
+                                    .filter_by(id=category_id)
+                                    .one()
+    )
     except NotFound as err:
-        return {"msg": err.description}, HTTPStatus.NOT_FOUND
+        return {"msg": "Category not found!"}, HTTPStatus.NOT_FOUND
 
     session.delete(category)
     session.commit()
