@@ -28,6 +28,8 @@ class CategoryModel(db.Model):
             raise TypeError(description=f"Invalid type for key '{key}'; it should be `string`.")
 
         if key == 'name':
-            return value.lower()
+            return value.title()
         if key == 'description':
             return value
+
+
