@@ -1,8 +1,10 @@
 from flask import request, jsonify, current_app
+from http import HTTPStatus
 from app.models.users_model import UserModel
 from sqlalchemy.exc import IntegrityError
-from app.exceptions.users_exceptions import CPFExc, PhoneExc
+from app.exceptions.users_exceptions import CPFExc, PhoneExc, BirthdateExc
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from datetime import timedelta
 
 
 @jwt_required()
@@ -20,11 +22,11 @@ def user_info():
             "cpf": get_user.cpf,
             "birthdate": get_user.birthdate,
         }
-        return jsonify(serialized), 200
+        return jsonify(serialized), HTTPStatus.OK
 
     return {
         "error": "User doesn't exists"
-    }, 404
+    }, HTTPStatus.NOT_FOUND
 
 
 def create_user():
@@ -56,12 +58,12 @@ def create_user():
         return {
             "allowed_keys": allowed_keys,
             "wrong_keys": wrong_keys
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     if(missing_keys):
         return {
             "missing_keys": missing_keys
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     try:
         password_to_hash = data.pop("password")
@@ -81,25 +83,30 @@ def create_user():
             "birthdate": send_data.birthdate
         }
 
-        return jsonify(serialized), 201
+        return jsonify(serialized), HTTPStatus.CREATED
 
     except PhoneExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     except CPFExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
+
+    except BirthdateExc as e:
+        return {
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
 
     except IntegrityError as e:
         if("email" in e.args[0]):
-            return {"error": "EMAIL already exists"}, 400
+            return {"error": "EMAIL already exists"}, HTTPStatus.BAD_REQUEST
         if("password_hash" in e.args[0]):
-            return {"error": "PASSWORD already exists"}, 400
+            return {"error": "PASSWORD already exists"}, HTTPStatus.BAD_REQUEST
         if("phone" in e.args[0]):
-            return {"error": "PHONE already exists"}, 400
+            return {"error": "PHONE already exists"}, HTTPStatus.BAD_REQUEST
 
 
 @jwt_required()
@@ -108,13 +115,13 @@ def update_user():
 
     user = get_jwt_identity()
 
-    allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password_hash"]
+    allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
     wrong_keys = []
 
     if(len(data) == 0):
         return {
             "allowed_keys": allowed_keys
-        }
+        }, HTTPStatus.BAD_REQUEST
 
 
     for i in data.keys():
@@ -125,7 +132,7 @@ def update_user():
     if(wrong_keys):
         return {
             "wrong_keys": wrong_keys
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
 
     try:
@@ -134,7 +141,7 @@ def update_user():
         if(get_user == None):
             return {
                 "error": "User not found"
-            }, 404
+            }, HTTPStatus.NOT_FOUND
 
         for key, value in data.items():
             setattr(get_user, key, value)
@@ -151,12 +158,22 @@ def update_user():
             "birthdate": get_user.birthdate
         }
 
-        return jsonify(serialized), 200
+        return jsonify(serialized), HTTPStatus.OK
 
-    except:
+    except CPFExc as e:
         return {
-            "error": "Server Error!"
-        }, 400
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
+
+    except PhoneExc as e:
+        return {
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
+
+    except BirthdateExc as e:
+        return {
+            "error": e.args[0]
+        }, HTTPStatus.BAD_REQUEST
 
 
 @jwt_required()
@@ -170,16 +187,16 @@ def delete_user():
             current_app.db.session.delete(serialized_user)
             current_app.db.session.commit()
 
-            return "", 200
+            return "", HTTPStatus.OK
 
         return {
             "error": "Server Error"
-        }, 500
+        }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     except:
         return {
             "error": "User doesn't exists"
-        }, 400
+        }, HTTPStatus.NOT_FOUND
 
 
 def login():
@@ -203,29 +220,29 @@ def login():
         return {
             "allowed_keys": allowed_keys,
             "missing_keys": missing_keys
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
 
     if(wrong_keys):
         return {
             "wrong_keys": wrong_keys
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
 
     user = UserModel.query.filter_by(email = data["email"]).first()
 
     try:
         if(user and user.verify_password(data["password"])):
-            token = create_access_token(user)
+            token = create_access_token(user, expires_delta=timedelta(hours=24))
 
             return {
                 "access_token": token
-            }, 200
+            }, HTTPStatus.OK
 
         return {
             "error": "email or password doesn't matches"
-        }, 404
+        }, HTTPStatus.NOT_FOUND
 
     except:
         return {
             "error": "Error"
-        }, 400
+        }, HTTPStatus.BAD_REQUEST
