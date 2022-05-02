@@ -9,6 +9,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
+from app.exceptions import InvalidDataTypeError
 
 TRUSTED_TASK_KEYS = ['month_year', 'max_value']
 ALLOWED_TASK_KEYS = ['month_year', 'max_value']
@@ -64,8 +65,11 @@ def create_budget():
 
         return jsonify(budget), HTTPStatus.CREATED
 
-    except ValueError:
+    except (ValueError, TypeError):
         return jsonify({"error": "Field 'month_year' must be format: mm/YYYY"}), HTTPStatus.BAD_REQUEST
+
+    except InvalidDataTypeError as err:
+        return jsonify({"err": err.description}), HTTPStatus.BAD_REQUEST
 
     # TORNOU-SE DESNECESSÁRIO
     # except IntegrityError as e:

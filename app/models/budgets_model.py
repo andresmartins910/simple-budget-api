@@ -1,9 +1,8 @@
-from datetime import date
-from enum import unique
 from app.configs.database import db
 from sqlalchemy import Column, ForeignKey, Numeric, Integer, String
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, validates
 from dataclasses import dataclass
+from app.exceptions import InvalidDataTypeError
 
 
 @dataclass
@@ -22,3 +21,20 @@ class BudgetModel(db.Model):
     user_id = Column(Integer, ForeignKey("user.id"))
 
     user = relationship("UserModel", backref=backref("budgets", uselist=True), uselist=False)
+
+    @validates('month_year')
+    def validate_keys(self, key, value):
+
+        if type(value) != str:
+            raise InvalidDataTypeError(description=f"Invalid type for key '{key}'; it should be `string`.")
+
+        return value
+
+    @validates('max_value')
+    def validate_keys(self, key, value):
+
+        if type(value) != float and type(value) != int:
+
+            raise InvalidDataTypeError(description=f"Invalid type for key '{key}'; it should be `monetary`.")
+
+        return value
