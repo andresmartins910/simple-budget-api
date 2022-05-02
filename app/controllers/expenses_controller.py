@@ -8,36 +8,33 @@ from app.configs.database import db
 from app.models.budgets_model import BudgetModel
 from app.models.categories_model import CategoryModel
 from app.models.expenses_model import ExpenseModel
-from app.services import verify_required_keys
+from app.models.users_model import UserModel
+from app.services import verify_allowed_keys, verify_required_keys
 
 
 @jwt_required()
 def all_expenses():
     session: Session = db.session
     current_user = get_jwt_identity()
-
-    try:
-        expenses = (session.query(ExpenseModel)
-                        .filter_by(user_id=current_user['id'])
-                        .all()
-    )
-    except NoResultFound:
-        return {"msg": "Budget not found"}, HTTPStatus.NOT_FOUND
-    if expenses == []:
-        return {"message": "whitout content"}, HTTPStatus.NO_CONTENT
+    user = (session.query(UserModel).filter_by(id=current_user['id']).one())
+    budgets = user.budgets
+    
     list_expense = []
-    for expense in expenses:
-        new_expense = {
-            "id": expense.id,
-	        "name": expense.name,
-	        "description": expense.description,
-	        "amount": expense.amount,
-            "created_at": expense.create_at,
-            "budget_id": expense.budget_id,
-	        "user_id": current_user['id']
-        }
-        list_expense.append(new_expense)
-    return "", 200
+    for budget in budgets:
+        expenses = budget.expenses
+        for expense in expenses:
+            new_expense = {
+                "id": expense.id,
+                "name": expense.name,
+                "description": expense.description,
+                "amount": expense.amount,
+                "created_at": expense.created_at,
+                "budget_id": expense.budget_id,
+                "user_id": current_user['id']
+            }
+            list_expense.append(new_expense)
+
+    return jsonify(list_expense), HTTPStatus.OK
 
 
 @jwt_required()
@@ -89,7 +86,7 @@ def update_expense(expense_id):
     data = request.get_json()
     trusted_update_keys = ['name','description','amount']
     try:
-        verify_required_keys(data, trusted_update_keys)
+        verify_allowed_keys(data, trusted_update_keys)
 
     except KeyError as e:
         return jsonify(e.args), HTTPStatus.BAD_REQUEST
