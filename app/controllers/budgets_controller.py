@@ -3,11 +3,15 @@ from http import HTTPStatus
 
 from app.configs.database import db
 from app.models import BudgetModel
+from app.services import verify_allowed_keys, verify_required_keys
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
+
+TRUSTED_TASK_KEYS = ['month_year', 'max_value']
+ALLOWED_TASK_KEYS = ['month_year', 'max_value']
 
 
 @jwt_required()
@@ -24,12 +28,17 @@ def get_budgets():
 
 @jwt_required()
 def create_budget():
-
     session: Session = db.session()
+
+    current_user = get_jwt_identity()
 
     data = request.get_json()
 
-    current_user = get_jwt_identity()
+    try:
+        verify_required_keys(data, TRUSTED_TASK_KEYS)
+        verify_allowed_keys(data, ALLOWED_TASK_KEYS)
+    except KeyError as err:
+        return jsonify(err.args[0]), HTTPStatus.BAD_REQUEST
 
     try:
         data['month_year'] = datetime.strptime(data['month_year'], "%m/%Y").strftime("%m/%Y")
@@ -93,21 +102,27 @@ def update_budget(budget_id):
     data = request.get_json()
 
     try:
-        data['month_year'] = datetime.strptime(data['month_year'], "%m/%Y").strftime("%m/%Y")
+        verify_allowed_keys(data, ALLOWED_TASK_KEYS)
+    except KeyError as err:
+        return jsonify(err.args[0]), HTTPStatus.BAD_REQUEST
 
-        data['user_id'] = current_user['id']
+    try:
+        if 'month_year' in data.keys():
+            data['month_year'] = datetime.strptime(data['month_year'], "%m/%Y").strftime("%m/%Y")
 
-        budget_found: BaseQuery = (session.query(BudgetModel)
-                                        .filter(BudgetModel.month_year == data['month_year'])
-                                        .filter(BudgetModel.user_id == data['user_id'])
-                                        .one_or_none()
-        )
+            data['user_id'] = current_user['id']
 
-        if budget_found:
-            return {
-                "error": "Budget already exists",
-                "description": "You can only have one budget per month, each year"
-            }, HTTPStatus.CONFLICT
+            budget_found: BaseQuery = (session.query(BudgetModel)
+                                            .filter(BudgetModel.month_year == data['month_year'])
+                                            .filter(BudgetModel.user_id == data['user_id'])
+                                            .one_or_none()
+            )
+
+            if budget_found:
+                return {
+                    "error": "Budget already exists",
+                    "description": "You can only have one budget per month, each year"
+                }, HTTPStatus.CONFLICT
 
         for key, value in data.items():
             setattr(budget, key, value)
