@@ -40,10 +40,9 @@ def create_user():
     try:
         verify_required_keys(data, trusted_keys)
         verify_allowed_keys(data, allowed_keys)
-        
+
     except KeyError as e:
         return jsonify(e.args), HTTPStatus.BAD_REQUEST
-
 
     try:
         password_to_hash = data.pop("password")
@@ -144,6 +143,14 @@ def update_user():
             "error": e.args[0]
         }, HTTPStatus.BAD_REQUEST
 
+    except IntegrityError as e:
+        if("email" in e.args[0]):
+            return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
+        if("password_hash" in e.args[0]):
+            return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
+        if("phone" in e.args[0]):
+            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
+
 
 @jwt_required()
 def delete_user():
@@ -171,31 +178,15 @@ def delete_user():
 def login():
     data = request.get_json()
 
+    trusted_keys = ["email", "password"]
     allowed_keys = ["email", "password"]
-    missing_keys = []
-    wrong_keys = []
 
-    for i in allowed_keys:
-        if(i not in data.keys()):
-            missing_keys.append(i)
+    try:
+        verify_required_keys(data, trusted_keys)
+        verify_allowed_keys(data, allowed_keys)
 
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
-
-
-    if(missing_keys):
-        return {
-            "allowed_keys": allowed_keys,
-            "missing_keys": missing_keys
-        }, HTTPStatus.BAD_REQUEST
-
-
-    if(wrong_keys):
-        return {
-            "wrong_keys": wrong_keys
-        }, HTTPStatus.BAD_REQUEST
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
     user = UserModel.query.filter_by(email = data["email"]).first()
 
@@ -208,7 +199,7 @@ def login():
             }, HTTPStatus.OK
 
         return {
-            "error": "email or password doesn't matches"
+            "error": "Email or Password doesn't matches"
         }, HTTPStatus.NOT_FOUND
 
     except:
