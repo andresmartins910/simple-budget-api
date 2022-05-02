@@ -17,8 +17,8 @@ class CategoryModel(db.Model):
 
 
     id = Column(Integer, primary_key = True)
-    name = Column(String(45), nullable = False, unique = True)
-    description = Column(String(90), nullable = False, unique = True)
+    name = Column(String(45), nullable = False)
+    description = Column(String(90), nullable = False)
     created_by = Column(String(20), nullable = False)
 
     @validates('name', 'description')
