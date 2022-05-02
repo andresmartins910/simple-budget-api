@@ -25,7 +25,7 @@ class UserModel(db.Model):
     name = Column(String(50), nullable = False)
     email = Column(String(70), nullable = False, unique = True)
     phone = Column(String(14), nullable = False, unique = True)
-    cpf = Column(String(14), nullable = True)
+    cpf = Column(String(14), nullable = True, unique = True)
     birthdate = Column(DateTime, nullable = True)
     password_hash = Column(String(511), nullable = False, unique = True)
 
