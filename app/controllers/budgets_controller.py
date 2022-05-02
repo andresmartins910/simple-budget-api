@@ -1,6 +1,9 @@
 from datetime import datetime
 from http import HTTPStatus
 
+from psycopg2.errors import UniqueViolation, ForeignKeyViolation
+from sqlalchemy.exc import IntegrityError
+
 from app.configs.database import db
 from app.models import BudgetModel
 from app.services import verify_allowed_keys, verify_required_keys
@@ -71,20 +74,19 @@ def create_budget():
     except InvalidDataTypeError as err:
         return jsonify({"err": err.description}), HTTPStatus.BAD_REQUEST
 
-    # TORNOU-SE DESNECESSÁRIO
-    # except IntegrityError as e:
-    #     if type(e.orig) == UniqueViolation:
+    except IntegrityError as e:
+        if type(e.orig) == UniqueViolation:
 
-    #         return {
-    #             "error": "Budget already exists",
-    #             "description": "You can only have one budget per month, each year"
-    #         }, HTTPStatus.CONFLICT
-    #     elif type(e.orig) == ForeignKeyViolation:
+            return {
+                "error": "Budget already exists",
+                "description": "You can only have one budget per month, each year"
+            }, HTTPStatus.CONFLICT
+        elif type(e.orig) == ForeignKeyViolation:
 
-    #         return {
-    #             "error": "User don't exists",
-    #             "description": "You can only register budget for users present in the database."
-    #         }, HTTPStatus.CONFLICT
+            return {
+                "error": "User don't exists",
+                "description": "You can only register budget for users present in the database."
+            }, HTTPStatus.CONFLICT
 
 @jwt_required()
 def update_budget(budget_id):
