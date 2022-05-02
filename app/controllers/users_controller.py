@@ -100,6 +100,11 @@ def create_user():
             "error": e.args[0]
         }, HTTPStatus.BAD_REQUEST
 
+    except BirthdateExc as e:
+        return {
+            "error": e.args[0]
+        }, 400
+
     except IntegrityError as e:
         if("email" in e.args[0]):
             return {"error": "EMAIL already exists"}, HTTPStatus.BAD_REQUEST

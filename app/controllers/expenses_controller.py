@@ -5,17 +5,44 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, Query
 from datetime import datetime as dt
 from app.configs.database import db
+from app.models.budgets_model import BudgetModel
+from app.models.categories_model import CategoryModel
 from app.models.expenses_model import ExpenseModel
+
+def all_expenses():
+    session: Session = db.session
+    # TODO: try/except
+    expenses = session.query(ExpenseModel).all()
+    if expenses == []:
+        return {"message": "whitout content"}, HTTPStatus.NO_CONTENT
+    list_expense = []
+    for expense in expenses:
+        new_expense = {
+            "id": expense.id,
+	        "name": expense.name,
+	        "description": expense.description,
+	        "amount": expense.amount,
+            "created_at": expense.create_at,
+            "budget_id": expense.budget_id,
+	        # "user_id": expense.category_id
+        }
+        list_expense.append(new_expense)
+    return "", 200
 
 
 @jwt_required()
 def add_expense():
-    data = request.get_json()
+    data = request.get_json() # name, amount, description?
     session: Session = db.session
     try:
-        # TODO: adicionar ao data p create_at
-        # data['create_at'] = dt.now()
+        data['created_at'] = dt.now().strftime("%Y-%m-%d %H:%M:%S")
+        category_request = data.pop('category')
+        category: CategoryModel = session.query(CategoryModel).filter(CategoryModel.name == category_request).first()
+        data['category_id'] = category.id
+        budget: BudgetModel = session.query(BudgetModel).get(data['budget_id'])
         expense = ExpenseModel(**data)
+        expense.budget = budget
+        expense.category = category
     except (Exception):
         raise TypeError
 
@@ -26,7 +53,17 @@ def add_expense():
         if type(err.orig).__name__ == "UniqueViolation":
             return {"error": "Unique Violation"}, HTTPStatus.CONFLICT
 
-    return "", HTTPStatus.CREATED
+    serialized = {
+            "id": expense.id,
+	        "name": expense.name,
+	        "description": expense.description,
+	        "amount": expense.amount,
+            "created_at": expense.created_at,
+            "budget_id": expense.budget_id,
+	        # "user_id": expense.user_id,
+        }
+
+    return jsonify(serialized), HTTPStatus.CREATED
 
 
 @jwt_required()
