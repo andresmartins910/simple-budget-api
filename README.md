@@ -343,7 +343,8 @@
     "amount": "30.00",
     "created_at": "Mon, 02 May 2022 17:18:59 GMT",
     "budget_month_year": "02/2022",
-    "budget_id": 6
+    "budget_id": 6,
+    "category": "Food"
   },
   {
     "id": 11,
@@ -352,7 +353,8 @@
     "amount": "15.00",
     "created_at": "Mon, 04 Jun 2022 14:28:07 GMT",
     "budget_month_year": "04/2022",
-    "budget_id": 7
+    "budget_id": 7,
+    "category": "Food"
   }
 ]
 ```
