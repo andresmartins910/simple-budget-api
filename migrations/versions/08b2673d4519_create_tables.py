@@ -61,21 +61,31 @@ def upgrade():
     )
     op.bulk_insert(category_table,
         [
-            {'id':1, 'name':'Food',
+            {
+                'name':'Food',
                 'description': 'Food related expenses',
-                'created_by': 'ADM'},
-            {'id':2, 'name':'Entertainment',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Entertainment',
                 'description': 'Entertainment related expenses',
-                'created_by': 'ADM'},
-            {'id':3, 'name':'Transport',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Transport',
                 'description': 'Transport related expenses',
-                'created_by': 'ADM'},
-            {'id':4, 'name':'Home',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Home',
                 'description': 'Home related expenses',
-                'created_by': 'ADM'},
-            {'id':5, 'name':'Health',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Health',
                 'description': 'Health related expenses',
-                'created_by': 'ADM'},
+                'created_by': 'ADM'
+            },
         ]
     )
     # ### end Alembic commands ###
