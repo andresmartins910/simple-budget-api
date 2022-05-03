@@ -11,7 +11,6 @@ class BudgetModel(db.Model):
     id: int
     month_year: str
     max_value: int
-    # user_id: int
 
     __tablename__ = "budget"
 
@@ -23,7 +22,7 @@ class BudgetModel(db.Model):
     user = relationship("UserModel", backref=backref("budgets", uselist=True), uselist=False)
 
     @validates('month_year')
-    def validate_keys(self, key, value):
+    def validate_month_year(self, key, value):
 
         if type(value) != str:
             raise InvalidDataTypeError(description=f"Invalid type for key '{key}'; it should be `string`.")
@@ -31,7 +30,7 @@ class BudgetModel(db.Model):
         return value
 
     @validates('max_value')
-    def validate_keys(self, key, value):
+    def validate_max_value(self, key, value):
 
         if type(value) != float and type(value) != int:
 
