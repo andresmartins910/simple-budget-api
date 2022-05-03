@@ -153,7 +153,7 @@ def update_expense(expense_id):
         "description": expense.description,
         "amount": expense.amount,
         "created_at": expense.created_at,
-        "category_id":  expense.category.name,
+        "category":  expense.category.name,
         "budget_id": expense.budget_id,
         "user_id": current_user['id']
     }, HTTPStatus.OK
