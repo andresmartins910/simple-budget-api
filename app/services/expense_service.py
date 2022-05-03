@@ -19,11 +19,16 @@ def verify_value_types(data):
 def verify_update_type(data):
     try:
         if type(data['name']) != str:
-            raise ValuesTypeError({"data": "name must be of type string"})
+            raise ValuesTypeError({"response": "name must be of type string"})
     except:
         pass
     try:
         if type(data['description']) != str:
-            raise ValuesTypeError({"data": "name must be of type string"})
+            raise ValuesTypeError({"response": "description must be of type string"})
+    except:
+        pass
+    try:
+        if type(data['category_id']) != int:
+            raise ValuesTypeError({"response": "category must be of type integer"})
     except:
         pass

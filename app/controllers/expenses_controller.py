@@ -32,7 +32,8 @@ def all_expenses():
                 "amount": expense.amount,
                 "created_at": expense.created_at,
                 "budget_month_year": budget.month_year,
-                "budget_id": budget.id
+                "budget_id": budget.id,
+                "category": expense.category.name
             }
             list_expense.append(new_expense)
 
@@ -122,7 +123,7 @@ def budget_expenses(budget_id):
 def update_expense(expense_id):
     data = request.get_json()
     current_user = get_jwt_identity()
-    trusted_update_keys = ['name','description','amount']
+    trusted_update_keys = ['name','description','amount', 'category_id']
     try:
         verify_allowed_keys(data, trusted_update_keys)
         verify_update_type(data)
