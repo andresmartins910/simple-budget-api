@@ -1,3 +1,5 @@
+from http import HTTPStatus
+from http.client import HTTPS_PORT
 from flask import request, jsonify, current_app
 from app.models.users_model import UserModel
 from sqlalchemy.exc import IntegrityError
@@ -20,11 +22,11 @@ def user_info():
             "cpf": get_user.cpf,
             "birthdate": get_user.birthdate,
         }
-        return jsonify(serialized), 200
+        return jsonify(serialized), HTTPStatus.OK
 
     return {
         "error": "User doesn't exists"
-    }, 404
+    }, HTTPStatus.NOT_FOUND
 
 
 def create_user():
@@ -47,13 +49,13 @@ def create_user():
     if(wrong_keys):
         return {
             "allowed_keys": allowed_keys,
-            "wrong_keys": wrong_keys 
-        }, 400
+            "wrong_keys": wrong_keys
+        }, HTTPStatus.CONFLICT
 
     if(missing_keys):
         return {
             "missing_keys": missing_keys
-        }, 400
+        }, HTTPStatus.CONFLICT
 
     try:
         password_to_hash = data.pop("password")
@@ -61,7 +63,7 @@ def create_user():
         send_data = UserModel(**data)
 
         send_data.password = password_to_hash
-    
+
         current_app.db.session.add(send_data)
         current_app.db.session.commit()
 
@@ -73,25 +75,27 @@ def create_user():
             "birthdate": send_data.birthdate
         }
 
-        return jsonify(serialized), 201
+        return jsonify(serialized), HTTPStatus.CREATED
 
     except PhoneExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.CONFLICT
 
     except CPFExc as e:
         return {
             "error": e.args[0]
-        }, 400
+        }, HTTPStatus.CONFLICT
 
     except IntegrityError as e:
         if("email" in e.args[0]):
-            return {"error": "EMAIL already exists"}, 400
+            return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
         if("password_hash" in e.args[0]):
-            return {"error": "PASSWORD already exists"}, 400
+            return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
         if("phone" in e.args[0]):
-            return {"error": "PHONE already exists"}, 400
+            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
+        if("cpf" in e.args[0]):
+            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -117,7 +121,7 @@ def update_user():
     if(wrong_keys):
         return {
             "wrong_keys": wrong_keys
-        }, 400
+        }, HTTPStatus.CONFLICT
 
 
     try:
@@ -126,7 +130,7 @@ def update_user():
         if(get_user == None):
             return {
                 "error": "User not found"
-            }, 404
+            }, HTTPStatus.NOT_FOUND
 
         for key, value in data.items():
             setattr(get_user, key, value)
@@ -143,12 +147,12 @@ def update_user():
             "birthdate": get_user.birthdate
         }
 
-        return jsonify(serialized), 200
+        return jsonify(serialized), HTTPStatus.OK
 
-    except: 
+    except:
         return {
             "error": "Server Error!"
-        }, 400
+        }, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -162,17 +166,17 @@ def delete_user():
             current_app.db.session.delete(serialized_user)
             current_app.db.session.commit()
 
-            return "", 200
+            return "", HTTPStatus.OK
 
         return {
             "error": "Server Error"
-        }, 500
+        }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     except:
         return {
             "error": "User doesn't exists"
-        }, 400
-    
+        }, HTTPStatus.CONFLICT
+
 
 def login():
     data = request.get_json()
@@ -185,7 +189,7 @@ def login():
         if(i not in data.keys()):
             missing_keys.append(i)
 
-    
+
     for i in data.keys():
         if(i not in allowed_keys):
             wrong_keys.append(i)
@@ -195,29 +199,29 @@ def login():
         return {
             "allowed_keys": allowed_keys,
             "missing_keys": missing_keys
-        }, 400
+        }, HTTPStatus.CONFLICT
 
-    
+
     if(wrong_keys):
         return {
             "wrong_keys": wrong_keys
-        }, 400
+        }, HTTPStatus.CONFLICT
 
     try:
         user = UserModel.query.filter_by(email = data["email"]).first()
-        
+
         if(user and user.verify_password(data["password"])):
             token = create_access_token(user)
 
             return {
                 "access_token": token
-            }, 200
+            }, HTTPStatus.OK
 
         return {
             "error": "email or password doesn't matches"
-        }, 404
+        }, HTTPStatus.NOT_FOUND
 
     except:
         return {
             "error": "Error"
-        }, 400
+        }, HTTPStatus.CONFLICT
