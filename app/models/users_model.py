@@ -25,7 +25,7 @@ class UserModel(db.Model):
     name = Column(String(50), nullable = False)
     email = Column(String(70), nullable = False, unique = True)
     phone = Column(String(14), nullable = False, unique = True)
-    cpf = Column(String(14), nullable = True)
+    cpf = Column(String(14), nullable = True, unique = True)
     birthdate = Column(DateTime, nullable = True)
     password_hash = Column(String(511), nullable = False, unique = True)
 
@@ -51,10 +51,6 @@ class UserModel(db.Model):
 
     @validates("birthdate")
     def validate_birthdate(self, key, value):
-
-        # if not datetime.strptime(value, "%d/%m/%Y") or value != datetime.strptime(value, "%d/%m/%Y").strftime("%d/%m/%Y"):
-        #     raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
-
         try:
             date = datetime.strptime(value, "%d/%m/%Y")
         except:
