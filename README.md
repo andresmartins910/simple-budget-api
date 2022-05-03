@@ -13,12 +13,12 @@
 
 ```json
 {
-    "name": "artemis",
-    "email": "kenzinho@mail.com",
-	"phone": "(27)99999-9999",
-    "password": "123456",
-    "cpf": "123.123.123-89",
-    "birthdate": "13/08/1997"
+  "name": "artemis",
+  "email": "kenzinho@mail.com",
+  "phone": "(27)99999-9999",
+  "password": "123456",
+  "cpf": "123.123.123-89",
+  "birthdate": "13/08/1997"
 }
 ```
 
@@ -26,11 +26,11 @@
 
 ```json
 {
-	"name": "Artemis",
-	"email": "kenzinho@mail.com",
-	"phone": "(27)99999-9999",
-	"cpf": "123.123.123-89",
-	"birthdate": "Wed, 13 Aug 1997 00:00:00 GMT"
+  "name": "Artemis",
+  "email": "kenzinho@mail.com",
+  "phone": "(27)99999-9999",
+  "cpf": "123.123.123-89",
+  "birthdate": "Wed, 13 Aug 1997 00:00:00 GMT"
 }
 ```
 
@@ -40,7 +40,7 @@
 
 ```json
 {
-    "name": "Kenzinho"
+  "name": "Kenzinho"
 }
 ```
 
@@ -48,11 +48,11 @@
 
 ```json
 {
-	"name": "Kenzinho",
-	"email": "kenzinho@mail.com",
-	"phone": "(27)99999-9999",
-	"cpf": "123.123.123-89",
-	"birthdate": "Wed, 13 Aug 1997 00:00:00 GMT"
+  "name": "Kenzinho",
+  "email": "kenzinho@mail.com",
+  "phone": "(27)99999-9999",
+  "cpf": "123.123.123-89",
+  "birthdate": "Wed, 13 Aug 1997 00:00:00 GMT"
 }
 ```
 
@@ -64,7 +64,6 @@
 </blockquote>
 
 `DELETE /users/:id - REQUISIÇÃO`
-
 
 `DELETE /users/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
@@ -124,9 +123,9 @@
 
 ```json
 {
-	"month": "janeiro",
-	"year": "2022",
-	"max_value": 3000.00
+  "month": "janeiro",
+  "year": "2022",
+  "max_value": 3000.0
 }
 ```
 
@@ -134,13 +133,14 @@
 
 ```json
 {
-	"id": 1,
-	"month": "Janeiro",
-	"year": "2022",
-	"max_value": "3000.00",
-	"user_id": 1
+  "id": 1,
+  "month": "Janeiro",
+  "year": "2022",
+  "max_value": "3000.00",
+  "user_id": 1
 }
 ```
+
 <h3 align ='center'> Atualizar Budgets </h3>
 
 <blockquote>
@@ -151,7 +151,7 @@
 
 ```json
 {
-	"max_value": 1000.00
+  "max_value": 1000.0
 }
 ```
 
@@ -159,11 +159,11 @@
 
 ```json
 {
-	"id": 1,
-	"month": "Janeiro",
-	"year": "2022",
-	"max_value": "1000.00",
-	"user_id": 1
+  "id": 1,
+  "month": "Janeiro",
+  "year": "2022",
+  "max_value": "1000.00",
+  "user_id": 1
 }
 ```
 
@@ -175,7 +175,6 @@
 </blockquote>
 
 `DELETE /budgets/:id - REQUISIÇÃO`
-
 
 `DELETE /budgets/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
@@ -194,20 +193,20 @@
 
 ```json
 [
-    {
-	    "id": 1,
-	    "month": "Janeiro",
-	    "year": "2022",
-	    "max_value": "1000.00",
-	    "user_id": 1
-    },
-    {
-	    "id": 2,
-	    "month": "Fevereiro",
-	    "year": "2022",
-	    "max_value": "3000.00",
-	    "user_id": 1
-    }
+  {
+    "id": 1,
+    "month": "Janeiro",
+    "year": "2022",
+    "max_value": "1000.00",
+    "user_id": 1
+  },
+  {
+    "id": 2,
+    "month": "Fevereiro",
+    "year": "2022",
+    "max_value": "3000.00",
+    "user_id": 1
+  }
 ]
 ```
 
@@ -222,9 +221,11 @@
 
 ```json
 {
-	"name": "Consulta",
-	"description": "Exame cardiológico",
-	"amount": 400.00,
+  "name": "Consulta",
+  "description": "Exame cardiológico",
+  "amount": 400.0,
+  "category_id": 1,
+  "budget_id": 7
 }
 ```
 
@@ -232,13 +233,14 @@
 
 ```json
 {
-	"id": 1,
-	"name": "Consulta",
-	"description": "Exame cardiológico",
-	"amount": "400.00",
-    "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
-    "budget_id": 2,
-	"user_id": 1
+  "id": 1,
+  "name": "Consulta",
+  "description": "Exame cardiológico",
+  "amount": "400.00",
+  "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
+  "budget_id": 2,
+  "category": "Health",
+  "budget": "03/2022"
 }
 ```
 
@@ -252,8 +254,8 @@
 
 ```json
 {
-    "description": "Exame cardiológico com Dr. Strauss",
-	"amount": 450.00
+  "description": "Exame cardiológico com Dr. Strauss",
+  "amount": 450.0
 }
 ```
 
@@ -261,13 +263,14 @@
 
 ```json
 {
-	"id": 1,
-	"name": "Consulta",
-	"description": "Exame cardiológico com Dr. Strauss",
-	"amount": "450.00",
-    "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
-    "budget_id": 2,
-	"user_id": 1
+  "id": 1,
+  "name": "Consulta",
+  "description": "Exame cardiológico com Dr. Strauss",
+  "amount": "450.00",
+  "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
+  "category": "Health",
+  "budget_id": 7,
+  "user_id": 3
 }
 ```
 
@@ -280,11 +283,44 @@
 
 `DELETE /expenses/:id - REQUISIÇÃO`
 
-
 `DELETE /expenses/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
 "No body returned for response"
+```
+
+<h3 align ='center'> Consultar Expenses do Budget</h3>
+
+<blockquote>
+  O usuário autenticado pode ver a lista de suas expenses referente aquele budget.
+  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
+</blockquote>
+
+`GET /expenses/:budget_id - REQUISIÇÃO`
+
+`GET /expenses/:budget_id - FORMATO DA RESPOSTA - STATUS 200:`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Consulta",
+    "description": "Exame cardiológico",
+    "amount": "400.00",
+    "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
+    "budget_id": 2,
+    "user_id": 1
+  },
+  {
+    "id": 2,
+    "name": "Compras",
+    "description": "Festa de aniversário da Nezuko",
+    "created_at": "Sat, 19 Fev 2022 10:20:49 GMT",
+    "amount": "700.00",
+    "budget_id": 2,
+    "user_id": 1
+  }
+]
 ```
 
 <h3 align ='center'> Consultar Expenses </h3>
@@ -294,27 +330,31 @@
   Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
 </blockquote>
 
-`GET /expenses/:budget_id - FORMATO DA RESPOSTA - STATUS 200:`
+`GET /expenses - FORMATO DA REQUISIÇÃO`
+
+`GET /expenses - FORMATO DA RESPOSTA - STATUS 200:`
 
 ```json
 [
-    {
-	    "id": 1,
-	    "name": "Consulta",
-	    "description": "Exame cardiológico",
-	    "amount": "400.00",
-        "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
-        "budget_id": 2,
-	    "user_id": 1
-    },
-    {
-	    "id": 2,
-	    "name": "Compras",
-	    "description": "Festa de aniversário da Nezuko",
-        "created_at": "Sat, 19 Fev 2022 10:20:49 GMT",
-	    "amount": "700.00",
-        "budget_id": 2,
-	    "user_id": 1
-    }
+  {
+    "id": 10,
+    "name": "almoço",
+    "description": "RU da faculdade",
+    "amount": "30.00",
+    "created_at": "Mon, 02 May 2022 17:18:59 GMT",
+    "budget_month_year": "02/2022",
+    "budget_id": 6,
+    "category": "Food"
+  },
+  {
+    "id": 11,
+    "name": "lanche",
+    "description": "barraca de vendas de salgados",
+    "amount": "15.00",
+    "created_at": "Mon, 04 Jun 2022 14:28:07 GMT",
+    "budget_month_year": "04/2022",
+    "budget_id": 7,
+    "category": "Food"
+  }
 ]
 ```
