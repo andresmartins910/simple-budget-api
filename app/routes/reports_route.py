@@ -18,10 +18,7 @@ bp.get("/xls")
 
 # Relatório de badget específico
 bp.get("/xls/<int:budget_id>")
-# # Relatório trimestral a partir de badget específico
-# bp.get("/xls/quarter/<int:budget_id>")
-# # Relatório semestral a partir de badget específico
-# bp.get("/xls/semester/<int:budget_id>")
+
 
 
 # ROTAS COM RETORNO EM .pdf
@@ -36,10 +33,7 @@ bp.get("/pdf")
 
 # Relatório de badget específico
 bp.get("/pdf/<int:budget_id>")
-# # Relatório trimestral a partir de badget específico
-# bp.get("/pdf/quarter/<int:budget_id>")
-# # Relatório semestral a partir de badget específico
-# bp.get("/pdf/semester/<int:budget_id>")
+
 
 
 
@@ -57,10 +51,7 @@ bp.get("/xls_to_mail")
 
 # Relatório de badget específico
 bp.get("/xls_to_mail/<int:budget_id>")
-# # Relatório trimestral a partir de badget específico
-# bp.get("/xls_to_mail/quarter/<int:budget_id>")
-# # Relatório semestral a partir de badget específico
-# bp.get("/xls_to_mail/semester/<int:budget_id>")
+
 
 
 # ROTAS COM RETORNO EM .pdf
@@ -75,8 +66,5 @@ bp.get("/pdf_to_mail")
 
 # Relatório de badget específico
 bp.get("/pdf_to_mail/<int:budget_id>")
-# # Relatório trimestral a partir de badget específico
-# bp.get("/pdf_to_mail/quarter/<int:budget_id>")
-# # Relatório semestral a partir de badget específico
-# bp.get("/pdf_to_mail/semester/<int:budget_id>")
+
 
