@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-# import controllers
+from app.controllers import reports_controller
 
 bp = Blueprint("reports_bp", __name__, url_prefix="/reports")
 
@@ -8,7 +8,8 @@ bp = Blueprint("reports_bp", __name__, url_prefix="/reports")
 
 # ROTAS COM RETORNO EM .xls
 
-bp.get("/xls")
+bp.get("/all")(reports_controller.all_report)
+bp.get("/xls")(reports_controller.report_with_filter)
 
 # /xls ( Relatório completo do usuário - Todos os Budgets e expenses do cadastro )
 # /xls?year=2022 ( Query param especificando ano do relatório )
@@ -17,7 +18,7 @@ bp.get("/xls")
 # /xls?initial_date=01/2022&final_date=04/2022 ( Query param para relatório de período )
 
 # Relatório de badget específico
-bp.get("/xls/<int:budget_id>")
+bp.get("/xls/<int:budget_id>")(reports_controller.report_with_filter_by_budget)
 
 
 
