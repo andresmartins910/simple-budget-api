@@ -30,22 +30,59 @@ def report_with_filter():
 
     if not year and not category_id and not initial_date and not final_date:
 
-        #  EXEMPLO DE QUERY
-        # registers: Query = (
-        #     registers
-        #     .select_from(table1)
-        #     .join(table2)
-        #     .join(table3)
-        #     .filter(func.lower(table1.name) == value.lower())
-        #     .filter(or_(func.lower(table2.job) == job.lower(),
-        #                 func.lower(table2.job) == value2.lower())
-        #             )
-        #     .filter_by(age=value3)
-        #     .all()
-        # )
+        session: Session = current_app.db.session
 
-        # /xls ( Relatório completo do usuário - Todos os Budgets e expenses do cadastro )
-        ...
+        budgets: Query = (
+            session.query(BudgetModel)
+            .join(UserModel)
+            .filter(BudgetModel.user_id == current_user["id"])
+            .all()
+        )
+
+        budgets_arr = []
+
+        for budget in budgets:
+
+            expenses: Query = (
+                session.query(ExpenseModel)
+                .join(BudgetModel)
+                .join(UserModel)
+                .filter(UserModel.id == current_user["id"])
+                .filter(ExpenseModel.budget_id == budget.id)
+                .all()
+            )
+
+            expenses_arr = []
+
+            for expense in expenses:
+
+                categories: Query = (
+                    session.query(CategoryModel)
+                    .filter(CategoryModel.id == expense.category_id)
+                    .first()
+                )
+
+                new_expense = {
+                    "name": expense.name,
+                    "description": expense.description,
+                    "amount": expense.amount,
+                    "created_at": expense.created_at,
+                    "category": categories.name ,
+                }
+
+                expenses_arr.append(new_expense)
+
+            new_budget = {
+                "budget_id": budget.id,
+                "expenses": expenses_arr
+            }
+
+            budgets_arr.append(new_budget)
+
+        data_return = {
+            "user": current_user["name"],
+            "budgets": budgets_arr
+        }
 
     elif year and not category_id and not initial_date and not final_date:
 
@@ -191,8 +228,8 @@ def report_with_filter_by_budget(budget_id):
     if not budget:
         return {"error": "no data found in database"}
 
-    curr_user = get_jwt_identity()
-   
+    current_user = get_jwt_identity()
+
     registers: Query = (
             registers
             .select_from(ExpenseModel)
@@ -200,7 +237,7 @@ def report_with_filter_by_budget(budget_id):
             .join(UserModel)
             .filter(ExpenseModel.budget_id == budget_id)
             .filter(BudgetModel.id == budget_id)
-            .filter(UserModel.id == curr_user['id'])
+            .filter(UserModel.id == current_user['id'])
             .all()
         )
 
@@ -217,71 +254,9 @@ def report_with_filter_by_budget(budget_id):
         expenses.append(new_expense)
 
     data_return = {
-        "user": curr_user['name'],
+        "user": current_user['name'],
         "budget": budget.month_year,
         "expenses": expenses
     }
 
     return jsonify(data_return), HTTPStatus.OK
-
-@jwt_required()
-def all_report():
-    session: Session = current_app.db.session
-
-    current_user = get_jwt_identity()
-
-    budgets: Query = (
-        session.query(BudgetModel)
-        .join(UserModel)
-        .filter(BudgetModel.user_id == current_user["id"])
-        .all()
-    )
-
-    budgets_arr = []
-
-    for budget in budgets:
-        
-        expenses: Query = (
-            session.query(ExpenseModel)
-            .join(BudgetModel)
-            .join(UserModel)
-            .filter(UserModel.id == current_user["id"])
-            .filter(ExpenseModel.budget_id == budget.id)
-            .all()
-        )
-        
-        expenses_arr = []
-
-        for expense in expenses:
-
-            categories: Query = (
-                session.query(CategoryModel)
-                .filter(CategoryModel.id == expense.category_id)
-                .first()
-            )
-                
-            new_expense = {
-                "name": expense.name,
-                "description": expense.description,
-                "amount": expense.amount,
-                "created_at": expense.created_at,
-                "category": categories.name ,
-            }
-            
-            expenses_arr.append(new_expense)
-        
-        new_budget = {
-            "budget_id": budget.id,
-            "expenses": expenses_arr
-        }
-
-        budgets_arr.append(new_budget)
-
-    return_data = {
-        "user": current_user["name"],
-        "budgets": budgets_arr
-    }
-
-    return jsonify(return_data), HTTPStatus.OK
-
-    
