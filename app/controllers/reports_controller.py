@@ -1,9 +1,8 @@
 from email.policy import HTTP
 from matplotlib import pyplot as plt
-import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -15,6 +14,15 @@ from app.models.users_model import UserModel
 from flask import request, current_app
 
 from http import HTTPStatus
+
+import os
+
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 
 @jwt_required()
@@ -106,9 +114,12 @@ def pdf_to_mail():
                     pdf.savefig()
                     plt.close()
 
+                    send_mail("auhuheuhew@gmail.com")
+
                     return {
                         "expenses": expenses
                     }, 201
+
             
             return {
                 "error": "Insufficient data"
@@ -149,3 +160,46 @@ def normalize_amount(expenses):
             total.append(object)
 
     return total, categories
+
+
+def send_mail(mail_to_send):
+    # VARIAVEIS DE AMBIENTE
+    fromaddr = os.getenv('APP_MAIL')
+    mail_pass = os.getenv('MAIL_PASS')
+    mail_host = os.getenv('HOST')
+    mail_port = os.getenv('PORT')
+    email = MIMEMultipart()
+    
+    # CONFIG MAIL
+
+    email['From'] = fromaddr
+    email['To'] = mail_to_send
+    email['Subject'] = 'Relatório'
+
+    # CORPO DO EMAIL
+
+    message = """
+        Segue em anexo o relatório solicitado.
+        Att.
+        Equipe Simple-Budget.
+    """
+    email.attach(MIMEText(message, "plain"))
+
+    # ANEXA O ARQUIVO
+
+    filename = 'expenses.pdf'
+    path = f'app/reports_temp/{filename}'
+    attachment = open(path, 'rb')
+    x = MIMEApplication(attachment.read(), Name=filename)
+    encoders.encode_base64(x)
+    x.add_header('Content-Disposition', 'attachment', filename=filename)
+    email.attach(x)
+
+    # ENVIO
+
+    mailer = smtplib.SMTP(mail_host, mail_port)
+    mailer.starttls()
+    mailer.login(email['From'], mail_pass)
+    text = email.as_string()
+    mailer.sendmail(email['From'], email['To'], text)
+    mailer.quit()

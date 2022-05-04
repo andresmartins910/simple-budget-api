@@ -17,9 +17,10 @@ class BudgetModel(db.Model):
     id = Column(Integer, primary_key=True)
     month_year = Column(String, nullable=False)
     max_value = Column(Numeric(10,2), nullable=False)
-    user_id = Column(Integer, ForeignKey("user.id"))
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
 
-    user = relationship("UserModel", backref=backref("budgets", uselist=True), uselist=False)
+    user = relationship("UserModel", backref=backref("budgets", uselist=True, cascade="all, delete"), uselist=False)
+    expenses = relationship("ExpenseModel", back_populates="budget", cascade="all, delete", passive_deletes=True)
 
     @validates('month_year')
     def validate_month_year(self, key, value):

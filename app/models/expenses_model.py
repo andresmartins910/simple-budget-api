@@ -20,10 +20,10 @@ class ExpenseModel(db.Model):
     description = Column(String(45), nullable=True)
     created_at = Column(DateTime, nullable=False)
     amount = Column(Numeric(10,2), nullable=False)
-    budget_id = Column(Integer, ForeignKey("budget.id"))
+    budget_id = Column(Integer, ForeignKey("budget.id", ondelete="CASCADE"))
     category_id = Column(Integer, ForeignKey("category.id"))
 
-    budget = db.relationship("BudgetModel", backref="expenses")
+    budget = db.relationship("BudgetModel", back_populates="expenses", uselist=False)
     category = db.relationship("CategoryModel", backref="expenses")
 
     @validates("name", "description")
@@ -48,6 +48,6 @@ class ExpenseModel(db.Model):
 
         if type(value) != int:
 
-            raise InvalidDataTypeError(description=f"Invalid type for key '{key}'; it should be `monetary`.")
+            raise InvalidDataTypeError(description=f"Invalid type for key '{key}'; it should be `integer`.")
 
         return value

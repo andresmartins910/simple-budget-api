@@ -1,8 +1,8 @@
 """create tables
 
-Revision ID: 08b2673d4519
+Revision ID: a38b5821c9b8
 Revises:
-Create Date: 2022-05-02 16:08:38.884986
+Create Date: 2022-05-04 12:23:22.825338
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '08b2673d4519'
+revision = 'a38b5821c9b8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -44,7 +44,7 @@ def upgrade():
     sa.Column('month_year', sa.String(), nullable=False),
     sa.Column('max_value', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('expense',
@@ -55,27 +55,37 @@ def upgrade():
     sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('budget_id', sa.Integer(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['budget_id'], ['budget.id'], ),
+    sa.ForeignKeyConstraint(['budget_id'], ['budget.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.bulk_insert(category_table,
         [
-            {'id':1, 'name':'Food',
+            {
+                'name':'Food',
                 'description': 'Food related expenses',
-                'created_by': 'ADM'},
-            {'id':2, 'name':'Entertainment',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Entertainment',
                 'description': 'Entertainment related expenses',
-                'created_by': 'ADM'},
-            {'id':3, 'name':'Transport',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Transport',
                 'description': 'Transport related expenses',
-                'created_by': 'ADM'},
-            {'id':4, 'name':'Home',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Home',
                 'description': 'Home related expenses',
-                'created_by': 'ADM'},
-            {'id':5, 'name':'Health',
+                'created_by': 'ADM'
+            },
+            {
+                'name':'Health',
                 'description': 'Health related expenses',
-                'created_by': 'ADM'},
+                'created_by': 'ADM'
+            },
         ]
     )
     # ### end Alembic commands ###
