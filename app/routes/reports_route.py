@@ -17,7 +17,7 @@ bp.get("/xls")(reports_controller.report_with_filter)
 # /xls?initial_date=01/2022&final_date=04/2022 ( Query param para relatório de período )
 
 # Relatório de badget específico
-bp.get("/xls/<int:budget_id>")
+bp.get("/xls/<int:budget_id>")(reports_controller.report_with_filter_by_budget)
 
 
 

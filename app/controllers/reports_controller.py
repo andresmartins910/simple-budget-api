@@ -183,4 +183,45 @@ def report_with_filter():
 
 @jwt_required()
 def report_with_filter_by_budget(budget_id):
-    ...
+    session: Session = db.session()
+
+    registers: BaseQuery = session.query(ExpenseModel)
+    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
+
+    if not budget:
+        return {"error": "no data found in database"}
+
+    curr_user = get_jwt_identity()
+   
+    registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(ExpenseModel.budget_id == budget_id)
+            .filter(BudgetModel.id == budget_id)
+            .filter(UserModel.id == curr_user['id'])
+            .all()
+        )
+
+    expenses = []
+
+    for expense in registers:
+        new_expense = {
+            "name": expense.name,
+            "description": expense.description,
+            "amount": expense.amount,
+            "created_at": expense.created_at
+        }
+
+        expenses.append(new_expense)
+
+    data_return = {
+        "user": curr_user['name'],
+        "budget": budget.month_year,
+        "expenses": expenses
+    }
+
+    return jsonify(data_return), HTTPStatus.OK
+
+    
