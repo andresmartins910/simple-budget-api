@@ -1,11 +1,13 @@
-from flask import request, jsonify, current_app
-from http import HTTPStatus
-from app.models.users_model import UserModel
-from sqlalchemy.exc import IntegrityError
-from app.exceptions.users_exceptions import CPFExc, PhoneExc, BirthdateExc
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import timedelta
+from http import HTTPStatus
+
+from app.exceptions.users_exceptions import BirthdateExc, CPFExc, PhoneExc
+from app.models.users_model import UserModel
 from app.services import verify_allowed_keys, verify_required_keys
+from flask import current_app, jsonify, request
+from flask_jwt_extended import (create_access_token, get_jwt_identity,
+                                jwt_required)
+from sqlalchemy.exc import IntegrityError
 
 
 @jwt_required()
@@ -28,11 +30,13 @@ def user_info():
     return {"error": "User doesn't exists"}, HTTPStatus.NOT_FOUND
 
 
+
 def create_user():
     data = request.get_json()
 
     trusted_keys = ["name", "email", "phone", "password"]
     allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
+
 
     try:
         verify_required_keys(data, trusted_keys)
@@ -134,6 +138,8 @@ def update_user():
             return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
         if "phone" in e.args[0]:
             return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
+        if "cpf" in e.args[0]:
+            return {"error": "CPF already exists"}, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -180,3 +186,4 @@ def login():
 
     except:
         return {"error": "Error"}, HTTPStatus.BAD_REQUEST
+
