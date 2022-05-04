@@ -1,19 +1,20 @@
-<p align="center">
-    Essa API foi contruída para a aplicação Simple Budget, no intuito de auxiliar no gerenciamento de gastos financeiros pessoais.
-</p>
+# Simple Budget API - Doc
 
-<p align="center">
-   Url base da API: https://simple-budget-api.herokuapp.com/
-</p>
+Essa API foi construída para a aplicação Simple Budget, no intuito de auxiliar no gerenciamento de gastos financeiros pessoais.
 
-<h2 align ='center'> Users </h2>
-<h3 align ='center'> Cadastro de um novo usuário </h3>
+URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.herokuapp.com/)
 
-`POST /users - FORMATO DA REQUISIÇÃO:`
+# Users
+
+## Rotas sem autenticação
+
+### Cadastro de um novo usuário
+
+`POST /user - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
-    "name": "artemis",
+	"name": "artemis",
     "email": "kenzinho@mail.com",
 	"phone": "(27)99999-9999",
     "password": "123456",
@@ -22,7 +23,7 @@
 }
 ```
 
-`POST /users - FORMATO DA RESPOSTA - STATUS 201:`
+`POST /user - FORMATO DA RESPOSTA - STATUS 201:`
 
 ```json
 {
@@ -34,9 +35,30 @@
 }
 ```
 
-<h3 align ='center'> Atualização das informações de usuário </h3>
+## Rotas com autenticação
 
-`PATCH /users/:id - FORMATO DA REQUISIÇÃO:`
+### Listagem de informações do usuário
+
+*É necessário autenticação por Bearer Token.*
+
+`GET /user - FORMATO DA RESPOSTA - STATUS 200`
+
+```json
+{
+    "id": 1,
+    "email": "kenzinho@mail.com",
+    "phone": "(27)99999-9999",
+    "name": "kenzinho",
+    "cpf": "123.123.123-89",
+    "birthdate": "13/08/1997"
+}
+```
+
+### Atualização das informações de usuário
+
+*É necessário autenticação por Bearer Token.* 
+
+`PATCH /user - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
@@ -44,7 +66,7 @@
 }
 ```
 
-`PATCH /users/:id - FORMATO DA RESPOSTA - STATUS 201:`
+`PATCH /user - FORMATO DA RESPOSTA - STATUS 201:`
 
 ```json
 {
@@ -56,77 +78,32 @@
 }
 ```
 
-<h3 align ='center'> Deletar Usuário </h3>
+### Deletar usuário
 
-<blockquote>
-  O usuário autenticado pode deletar sua conta.
-  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
-</blockquote>
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
 
-`DELETE /users/:id - REQUISIÇÃO`
+`DELETE /user - REQUISIÇÃO`
 
-
-`DELETE /users/:id - FORMATO DA RESPOSTA - STATUS 204:`
+`DELETE /user - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
-"No body returned for response"
+    "No body returned for response"
 ```
 
-<h3 align ='center'> Listagem de informações do usuário </h3>
+# Budgets
 
-<blockquote>
-  O usuário autenticado pode ver suas informações.
-  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
-</blockquote>
+## Rotas com autenticação
 
-`GET /users - FORMATO DA RESPOSTA - STATUS 200`
+### Criar budgets
 
-```json
-[
-  {
-    "id": 1,
-    "email": "kenzinho@mail.com",
-    "phone": "(27)99999-9999",
-    "name": "kenzinho",
-    "cpf": "123.123.123-89",
-    "birthdate": "13/08/1997"
-  }
-]
-```
-
-<h2 align ='center'> Login </h2>
-
-`POST /login - FORMATO DA REQUISIÇÃO:`
-
-```json
-{
-  "email": "kenzinho@mail.com",
-  "password": "123456"
-}
-```
-
-`POST /login - FORMATO DA RESPOSTA - STATUS 200:`
-
-```json
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImluZ3JpZHlAbWFpbC5jb20iLCJpYXQiOjE2NDMwMzEzNjQsImV4cCI6MTY0MzAzNDk2NCwic3ViIjoiMSJ9.-ZpZEy_ZkpyDjizo8JEZF6gRIfOKMS6yWBHfdVGTSN4"
-}
-```
-
-<h2 align ='center'> Budgets </h2>
-<h3 align ='center'> Criar Budgets </h3>
-
-<blockquote>
-  O usuário autenticado pode criar novos budgets.
-</blockquote>
+*É necessário autenticação por Bearer Token.*
 
 `POST /budgets - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
-	"month": "janeiro",
-	"year": "2022",
-	"max_value": 3000.00
+	"month_year": "05/2022",
+	"max_value": 3500
 }
 ```
 
@@ -134,24 +111,22 @@
 
 ```json
 {
-	"id": 1,
-	"month": "Janeiro",
-	"year": "2022",
-	"max_value": "3000.00",
-	"user_id": 1
+	"id": 2,
+	"month_year": "05/2022",
+	"max_value": "3500.00"
 }
 ```
-<h3 align ='center'> Atualizar Budgets </h3>
 
-<blockquote>
-  O usuário autenticado pode atualizar seus budgets.
-</blockquote>
+### Atualizar budgets
+
+*É necessário autenticação por Bearer Token.*
 
 `PATCH /budgets/:id - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
-	"max_value": 1000.00
+	"month_year": "06/2022",
+	"max_value": 200
 }
 ```
 
@@ -160,71 +135,62 @@
 ```json
 {
 	"id": 1,
-	"month": "Janeiro",
-	"year": "2022",
-	"max_value": "1000.00",
-	"user_id": 1
+	"month_year": "06/2022",
+	"max_value": "200.00"
 }
 ```
 
-<h3 align ='center'> Deletar Budgets </h3>
+### Obter budgets
 
-<blockquote>
-  O usuário autenticado pode deletar seus budgets.
-  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
-</blockquote>
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
 
-`DELETE /budgets/:id - REQUISIÇÃO`
-
-
-`DELETE /budgets/:id - FORMATO DA RESPOSTA - STATUS 204:`
-
-```json
-"No body returned for response"
-```
-
-<h3 align ='center'> Consultar Budgets </h3>
-
-<blockquote>
-  O usuário autenticado pode ver a lista dos seus budgets.
-  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
-</blockquote>
+`GET /budgets - REQUISIÇÃO`
 
 `GET /budgets - FORMATO DA RESPOSTA - STATUS 200:`
 
 ```json
 [
-    {
-	    "id": 1,
-	    "month": "Janeiro",
-	    "year": "2022",
-	    "max_value": "1000.00",
-	    "user_id": 1
-    },
-    {
-	    "id": 2,
-	    "month": "Fevereiro",
-	    "year": "2022",
-	    "max_value": "3000.00",
-	    "user_id": 1
-    }
+	{
+		"id": 1,
+		"month_year": "06/2022",
+		"max_value": "200.00"
+	},
+	{
+		"id": 3,
+		"month_year": "07/2022",
+		"max_value": "1200.00"
+	}
 ]
 ```
 
-<h2 align ='center'> Expenses </h2>
-<h3 align ='center'> Criar Expenses </h3>
+### Deletar budgets
 
-<blockquote>
-  O usuário autenticado pode criar novas expenses.
-</blockquote>
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
+
+`DELETE /budgets/:id - REQUISIÇÃO`
+
+`DELETE /budgets/:id - FORMATO DA RESPOSTA - STATUS 204:`
+
+```json
+    "No body returned for response"
+```
+
+# Expenses
+
+## Rotas com autenticação
+
+### Criar expense
+
+*É necessário autenticação por Bearer Token.*
 
 `POST /expenses - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
-	"name": "Consulta",
-	"description": "Exame cardiológico",
-	"amount": 400.00,
+	"name": "Pizza Hut",
+	"amount": 90,
+	"category_id": 1,
+	"budget_id": 1
 }
 ```
 
@@ -233,27 +199,25 @@
 ```json
 {
 	"id": 1,
-	"name": "Consulta",
-	"description": "Exame cardiológico",
-	"amount": "400.00",
-    "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
-    "budget_id": 2,
-	"user_id": 1
+	"name": "Pizza hut",
+	"description": null,
+	"amount": "90.00",
+	"created_at": "Tue, 03 May 2022 11:36:08 GMT",
+	"category": "Food",
+	"budget": "06/2022"
 }
 ```
 
-<h3 align ='center'> Atualizar Expense </h3>
+### Atualizar expense
 
-<blockquote>
-  O usuário autenticado pode atualizar suas expenses.
-</blockquote>
+*É necessário autenticação por Bearer Token.*
 
 `PATCH /expenses/:id - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
-    "description": "Exame cardiológico com Dr. Strauss",
-	"amount": 450.00
+	"amount": 120,
+    "description": "4 cheese pizza"
 }
 ```
 
@@ -262,24 +226,71 @@
 ```json
 {
 	"id": 1,
-	"name": "Consulta",
-	"description": "Exame cardiológico com Dr. Strauss",
-	"amount": "450.00",
-    "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
-    "budget_id": 2,
-	"user_id": 1
+	"name": "Pizza hut",
+	"description": "4 cheese pizza",
+	"amount": "120.00",
+	"created_at": "Tue, 03 May 2022 11:36:08 GMT",
+	"category": "Food",
+	"budget": "06/2022"
 }
 ```
 
-<h3 align ='center'> Deletar Expenses </h3>
+### Obter expenses
 
-<blockquote>
-  O usuário autenticado pode deletar suas expenses.
-  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
-</blockquote>
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
+
+`GET /expenses - REQUISIÇÃO`
+
+`GET /expenses - FORMATO DA RESPOSTA - STATUS 200:`
+
+```json
+[
+	{
+		"id": 2,
+		"name": "Uber",
+		"description": "To são paulo",
+		"amount": "180.00",
+		"created_at": "Tue, 03 May 2022 12:26:17 GMT",
+		"category": "Transport",
+		"budget": "06/2022"
+	},
+	{
+		"id": 3,
+		"name": "Pizza hut",
+		"description": null,
+		"amount": "120.00",
+		"created_at": "Tue, 03 May 2022 12:34:09 GMT",
+		"category": "Food",
+		"budget": "06/2022"
+	}
+]
+```
+
+### Obter expense por id
+
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
+
+`GET /expenses/:id- REQUISIÇÃO`
+
+`GET /expenses/:id - FORMATO DA RESPOSTA - STATUS 200:`
+
+```json
+{
+	"id": 2,
+	"name": "Uber",
+	"description": "To são paulo",
+	"amount": "180.00",
+	"created_at": "Tue, 03 May 2022 12:26:17 GMT",
+	"category": "Transport",
+	"budget": "06/2022"
+}
+```
+
+### Deletar expense
+
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
 
 `DELETE /expenses/:id - REQUISIÇÃO`
-
 
 `DELETE /expenses/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
@@ -287,34 +298,102 @@
 "No body returned for response"
 ```
 
-<h3 align ='center'> Consultar Expenses </h3>
+# Categories
 
-<blockquote>
-  O usuário autenticado pode ver a lista de suas expenses.
-  Obs: não possui corpo de requisição, mas nessecita do token no headers para acesso.
-</blockquote>
+## Rotas com autenticação
 
-`GET /expenses/:budget_id - FORMATO DA RESPOSTA - STATUS 200:`
+### Criar category
+
+*É necessário autenticação por Bearer Token.*
+
+`POST /categories - FORMATO DA REQUISIÇÃO:`
+
+```json
+{
+    "name": "Hobby",
+	"description": "Everything related to hobbies"
+}
+```
+
+`POST /categories - FORMATO DA RESPOSTA - STATUS 201:`
+
+```json
+{
+	"id": 1,
+	"name": "Hobby",
+	"description": "Everything related to hobbies"
+}
+```
+
+### Atualizar category
+
+*É necessário autenticação por Bearer Token.*
+
+`POST /categories/:id - FORMATO DA REQUISIÇÃO:`
+
+```json
+{
+    "name": "Hobbies",
+	"description": "Everything related to hobbies."
+}
+```
+
+`POST /categories/:id - FORMATO DA RESPOSTA - STATUS 201:`
+
+```json
+{
+	"id": 1,
+    "name": "Hobbies",
+	"description": "Everything related to hobbies."
+}
+```
+
+### Obter categories
+
+*É necessário autenticação por Bearer Token. Não possui corpo de requisição.*
+
+`GET /categories/:id- REQUISIÇÃO`
+
+`GET /categories/:id - FORMATO DA RESPOSTA - STATUS 200:`
 
 ```json
 [
-    {
-	    "id": 1,
-	    "name": "Consulta",
-	    "description": "Exame cardiológico",
-	    "amount": "400.00",
-        "created_at": "Wed, 16 Fev 2022 10:20:49 GMT",
-        "budget_id": 2,
-	    "user_id": 1
-    },
-    {
-	    "id": 2,
-	    "name": "Compras",
-	    "description": "Festa de aniversário da Nezuko",
-        "created_at": "Sat, 19 Fev 2022 10:20:49 GMT",
-	    "amount": "700.00",
-        "budget_id": 2,
-	    "user_id": 1
-    }
+	{
+		"id": 1,
+		"name": "Food",
+		"description": "Food related expenses"
+	},
+	{
+		"id": 2,
+		"name": "Entertainment",
+		"description": "Entertainment related expenses"
+	},
+	{
+		"id": 3,
+		"name": "Transport",
+		"description": "Transport related expenses"
+	},
+	{
+		"id": 4,
+		"name": "Home",
+		"description": "Home related expenses"
+	},
+	{
+		"id": 5,
+		"name": "Health",
+		"description": "Health related expenses"
+	}
 ]
 ```
+
+### Deletar category
+
+`DELETE /categories/:id - REQUISIÇÃO`
+
+`DELETE /categories/:id - FORMATO DA RESPOSTA - STATUS 204:`
+
+```json
+    "No body returned for response"
+```
+
+# Reports

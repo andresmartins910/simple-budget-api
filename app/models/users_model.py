@@ -1,9 +1,10 @@
 from app.configs.database import db
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import validates
 from dataclasses import dataclass
 import re
-from app.exceptions.users_exceptions import PhoneExc, CPFExc
+from app.exceptions.users_exceptions import PhoneExc, CPFExc, BirthdateExc
+from datetime import datetime
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -24,8 +25,8 @@ class UserModel(db.Model):
     name = Column(String(50), nullable = False)
     email = Column(String(70), nullable = False, unique = True)
     phone = Column(String(14), nullable = False, unique = True)
-    cpf = Column(String(14), nullable = True)
-    birthdate = Column(Date, nullable = True)
+    cpf = Column(String(14), nullable = True, unique = True)
+    birthdate = Column(DateTime, nullable = True)
     password_hash = Column(String(511), nullable = False, unique = True)
 
 
@@ -48,6 +49,14 @@ class UserModel(db.Model):
         else:
             raise CPFExc("CPF Format must be: 111.222.333-44")
 
+    @validates("birthdate")
+    def validate_birthdate(self, key, value):
+        try:
+            date = datetime.strptime(value, "%d/%m/%Y")
+        except:
+            raise BirthdateExc("Birthdate format must be: dd/mm/YYYY")
+
+        return date
 
     @property
     def password(self):
