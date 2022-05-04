@@ -184,3 +184,64 @@ def report_with_filter():
 @jwt_required()
 def report_with_filter_by_budget(budget_id):
     ...
+
+@jwt_required()
+def all_report():
+    session: Session = current_app.db.session
+
+    current_user = get_jwt_identity()
+
+    budgets: Query = (
+        session.query(BudgetModel)
+        .join(UserModel)
+        .filter(BudgetModel.user_id == current_user["id"])
+        .all()
+    )
+
+    budgets_arr = []
+
+    for budget in budgets:
+        
+        expenses: Query = (
+            session.query(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(UserModel.id == current_user["id"])
+            .filter(ExpenseModel.budget_id == budget.id)
+            .all()
+        )
+        
+        expenses_arr = []
+
+        for expense in expenses:
+
+            categories: Query = (
+                session.query(CategoryModel)
+                .filter(CategoryModel.id == expense.category_id)
+                .first()
+            )
+                
+            new_expense = {
+                "name": expense.name,
+                "description": expense.description,
+                "amount": expense.amount,
+                "created_at": expense.created_at,
+                "category": categories.name ,
+            }
+            
+            expenses_arr.append(new_expense)
+        
+        new_budget = {
+            "budget_id": budget.id,
+            "expenses": expenses_arr
+        }
+
+        budgets_arr.append(new_budget)
+
+    return_data = {
+        "user": current_user["name"],
+        "budgets": budgets_arr
+    }
+
+    return jsonify(return_data)
+
