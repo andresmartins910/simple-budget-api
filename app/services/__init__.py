@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import esparto as es
+import pandas as pd
 
 
 def verify_required_keys(data, trusted_keys):
@@ -66,6 +67,13 @@ def send_mail(mail_to_send, attachment, subject, mail_body):
     s.sendmail(fromaddr, mail_to_send, text)
 
     s.quit()
+
+def test_pandas(data_json):
+
+    df = pd.read_json(data_json, orient='records')
+
+    print(f'{df=}')
+    ...
 
 
 def get_report_to_pdf(type:int):
