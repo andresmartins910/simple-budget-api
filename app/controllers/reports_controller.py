@@ -14,7 +14,9 @@ from app.models.budgets_model import BudgetModel
 from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
 
-from app.services import test_pandas
+
+from ..services import send_mail
+
 
 
 @jwt_required()

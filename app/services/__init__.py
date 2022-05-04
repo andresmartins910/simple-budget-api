@@ -1,7 +1,7 @@
 import os
 import smtplib
 from email import encoders
-from email.mime.base import MIMEBase
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -32,41 +32,6 @@ def verify_allowed_keys(data, allowed_keys):
         if key not in allowed_keys:
             raise KeyError(err_missing_key)
 
-def send_mail(mail_to_send, attachment, subject, mail_body):
-
-    fromaddr = os.getenv('APP_MAIL')
-    mail_pass = os.getenv('MAIL_PASS')
-    mail_host = os.getenv('HOST')
-    mail_port = os.getenv('PORT')
-
-    msg = MIMEMultipart()
-
-    msg['From'] = fromaddr
-    msg['To'] = mail_to_send
-    msg['Subject'] = subject
-
-    body = mail_body
-    msg.attach(MIMEText(body, 'plain'))
-
-    filename = "File_name_with_extension"
-
-    attachment = open("Path of the file", "rb")
-
-    p = MIMEBase('application', 'octet-stream')
-    p.set_payload((attachment).read())
-    encoders.encode_base64(p)
-    p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-    msg.attach(p)
-
-    s = smtplib.SMTP(mail_host, mail_port)
-
-    s.starttls()
-
-    s.login(fromaddr, mail_pass)
-    text = msg.as_string()
-    s.sendmail(fromaddr, mail_to_send, text)
-
-    s.quit()
 
 def test_pandas(data_json):
 
@@ -119,3 +84,48 @@ def get_report_to_pdf(type:int):
     else:
         page.save_pdf("app/services/test/report.pdf")
         return "", 200
+
+
+def send_mail(mail_to_send):
+
+    # VARIAVEIS DE AMBIENTE
+    fromaddr = os.getenv('APP_MAIL')
+    mail_pass = os.getenv('MAIL_PASS')
+    mail_host = os.getenv('HOST')
+    mail_port = os.getenv('PORT')
+
+
+    email = MIMEMultipart()
+
+    # CONFIG MAIL
+    email['From'] = fromaddr
+    email['To'] = mail_to_send
+    email['Subject'] = 'Relatório'
+
+    # CORPO DO EMAIL
+    message = """
+        Segue em anexo o relatório solicitado.
+
+        Att.
+
+        Equipe Simple-Budget.
+    """
+    email.attach(MIMEText(message, "plain"))
+
+    # ANEXA O ARQUIVO
+    filename = 'report.pdf'
+    path = f'app/reports_temp/{filename}'
+
+    attachment = open(path, 'rb')
+    x = MIMEApplication(attachment.read(), Name=filename)
+    encoders.encode_base64(x)
+    x.add_header('Content-Disposition', 'attachment', filename=filename)
+    email.attach(x)
+
+    # ENVIO
+    mailer = smtplib.SMTP(mail_host, mail_port)
+    mailer.starttls()
+    mailer.login(email['From'], mail_pass)
+    text = email.as_string()
+    mailer.sendmail(email['From'], email['To'], text)
+    mailer.quit()
