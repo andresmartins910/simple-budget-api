@@ -1,10 +1,13 @@
+from datetime import timedelta
 from http import HTTPStatus
-from http.client import HTTPS_PORT
-from flask import request, jsonify, current_app
+
+from app.exceptions.users_exceptions import BirthdateExc, CPFExc, PhoneExc
 from app.models.users_model import UserModel
+from app.services import verify_allowed_keys, verify_required_keys
+from flask import current_app, jsonify, request
+from flask_jwt_extended import (create_access_token, get_jwt_identity,
+                                jwt_required)
 from sqlalchemy.exc import IntegrityError
-from app.exceptions.users_exceptions import CPFExc, PhoneExc
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
 @jwt_required()
@@ -13,7 +16,7 @@ def user_info():
 
     get_user = UserModel.query.get(user["id"])
 
-    if(get_user):
+    if get_user:
         serialized = {
             "id": get_user.id,
             "name": get_user.name,
@@ -24,38 +27,23 @@ def user_info():
         }
         return jsonify(serialized), HTTPStatus.OK
 
-    return {
-        "error": "User doesn't exists"
-    }, HTTPStatus.NOT_FOUND
+    return {"error": "User doesn't exists"}, HTTPStatus.NOT_FOUND
+
 
 
 def create_user():
     data = request.get_json()
 
+    trusted_keys = ["name", "email", "phone", "password"]
     allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
-    wrong_keys = []
-    missing_keys = []
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
 
 
-    for i in allowed_keys:
-        if(i not in data.keys()):
-            missing_keys.append(i)
+    try:
+        verify_required_keys(data, trusted_keys)
+        verify_allowed_keys(data, allowed_keys)
 
-
-    if(wrong_keys):
-        return {
-            "allowed_keys": allowed_keys,
-            "wrong_keys": wrong_keys
-        }, HTTPStatus.CONFLICT
-
-    if(missing_keys):
-        return {
-            "missing_keys": missing_keys
-        }, HTTPStatus.CONFLICT
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
     try:
         password_to_hash = data.pop("password")
@@ -72,30 +60,29 @@ def create_user():
             "email": send_data.email,
             "phone": send_data.phone,
             "cpf": send_data.cpf,
-            "birthdate": send_data.birthdate
+            "birthdate": send_data.birthdate,
         }
 
         return jsonify(serialized), HTTPStatus.CREATED
 
     except PhoneExc as e:
-        return {
-            "error": e.args[0]
-        }, HTTPStatus.CONFLICT
+        return {"error": e.args[0]}, HTTPStatus.BAD_REQUEST
 
     except CPFExc as e:
-        return {
-            "error": e.args[0]
-        }, HTTPStatus.CONFLICT
+        return {"error": e.args[0]}, HTTPStatus.BAD_REQUEST
+
+    except BirthdateExc as e:
+        return {"error": e.args[0]}, HTTPStatus.BAD_REQUEST
 
     except IntegrityError as e:
-        if("email" in e.args[0]):
+        if "email" in e.args[0]:
             return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
-        if("password_hash" in e.args[0]):
+        if "password_hash" in e.args[0]:
             return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
-        if("phone" in e.args[0]):
+        if "phone" in e.args[0]:
             return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
-        if("cpf" in e.args[0]):
-            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
+        if "cpf" in e.args[0]:
+            return {"error": "CPF already exists"}, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -104,33 +91,19 @@ def update_user():
 
     user = get_jwt_identity()
 
-    allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password_hash"]
-    wrong_keys = []
-
-    if(len(data) == 0):
-        return {
-            "allowed_keys": allowed_keys
-        }
-
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
-
-
-    if(wrong_keys):
-        return {
-            "wrong_keys": wrong_keys
-        }, HTTPStatus.CONFLICT
-
+    allowed_keys = ["name", "email", "phone", "cpf", "birthdate", "password"]
 
     try:
-        get_user = UserModel.query.filter_by(id = user["id"]).first()
+        verify_allowed_keys(data, allowed_keys)
 
-        if(get_user == None):
-            return {
-                "error": "User not found"
-            }, HTTPStatus.NOT_FOUND
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
+
+    try:
+        get_user = UserModel.query.filter_by(id=user["id"]).first()
+
+        if get_user == None:
+            return {"error": "User not found"}, HTTPStatus.NOT_FOUND
 
         for key, value in data.items():
             setattr(get_user, key, value)
@@ -144,15 +117,29 @@ def update_user():
             "email": get_user.email,
             "phone": get_user.phone,
             "cpf": get_user.cpf,
-            "birthdate": get_user.birthdate
+            "birthdate": get_user.birthdate,
         }
 
         return jsonify(serialized), HTTPStatus.OK
 
-    except:
-        return {
-            "error": "Server Error!"
-        }, HTTPStatus.CONFLICT
+    except CPFExc as e:
+        return {"error": e.args[0]}, HTTPStatus.BAD_REQUEST
+
+    except PhoneExc as e:
+        return {"error": e.args[0]}, HTTPStatus.BAD_REQUEST
+
+    except BirthdateExc as e:
+        return {"error": e.args[0]}, HTTPStatus.BAD_REQUEST
+
+    except IntegrityError as e:
+        if "email" in e.args[0]:
+            return {"error": "EMAIL already exists"}, HTTPStatus.CONFLICT
+        if "password_hash" in e.args[0]:
+            return {"error": "PASSWORD already exists"}, HTTPStatus.CONFLICT
+        if "phone" in e.args[0]:
+            return {"error": "PHONE already exists"}, HTTPStatus.CONFLICT
+        if "cpf" in e.args[0]:
+            return {"error": "CPF already exists"}, HTTPStatus.CONFLICT
 
 
 @jwt_required()
@@ -160,7 +147,7 @@ def delete_user():
     try:
         user = get_jwt_identity()
 
-        if(user):
+        if user:
             serialized_user = UserModel.query.get(user["id"])
 
             current_app.db.session.delete(serialized_user)
@@ -168,60 +155,35 @@ def delete_user():
 
             return "", HTTPStatus.OK
 
-        return {
-            "error": "Server Error"
-        }, HTTPStatus.INTERNAL_SERVER_ERROR
+        return {"error": "Server Error"}, HTTPStatus.INTERNAL_SERVER_ERROR
 
     except:
-        return {
-            "error": "User doesn't exists"
-        }, HTTPStatus.CONFLICT
+        return {"error": "User doesn't exists"}, HTTPStatus.NOT_FOUND
 
 
 def login():
     data = request.get_json()
 
+    trusted_keys = ["email", "password"]
     allowed_keys = ["email", "password"]
-    missing_keys = []
-    wrong_keys = []
-
-    for i in allowed_keys:
-        if(i not in data.keys()):
-            missing_keys.append(i)
-
-
-    for i in data.keys():
-        if(i not in allowed_keys):
-            wrong_keys.append(i)
-
-
-    if(missing_keys):
-        return {
-            "allowed_keys": allowed_keys,
-            "missing_keys": missing_keys
-        }, HTTPStatus.CONFLICT
-
-
-    if(wrong_keys):
-        return {
-            "wrong_keys": wrong_keys
-        }, HTTPStatus.CONFLICT
 
     try:
-        user = UserModel.query.filter_by(email = data["email"]).first()
+        verify_required_keys(data, trusted_keys)
+        verify_allowed_keys(data, allowed_keys)
 
-        if(user and user.verify_password(data["password"])):
-            token = create_access_token(user)
+    except KeyError as e:
+        return jsonify(e.args), HTTPStatus.BAD_REQUEST
 
-            return {
-                "access_token": token
-            }, HTTPStatus.OK
+    user = UserModel.query.filter_by(email=data["email"]).first()
 
-        return {
-            "error": "email or password doesn't matches"
-        }, HTTPStatus.NOT_FOUND
+    try:
+        if user and user.verify_password(data["password"]):
+            token = create_access_token(user, expires_delta=timedelta(hours=24))
+
+            return {"access_token": token}, HTTPStatus.OK
+
+        return {"error": "Email or Password doesn't matches"}, HTTPStatus.NOT_FOUND
 
     except:
-        return {
-            "error": "Error"
-        }, HTTPStatus.CONFLICT
+        return {"error": "Error"}, HTTPStatus.BAD_REQUEST
+

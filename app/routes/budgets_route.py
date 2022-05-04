@@ -1,10 +1,9 @@
 from flask import Blueprint
-
-# import controllers
+from app.controllers import budgets_controller
 
 bp = Blueprint("budgets_bp", __name__, url_prefix="/budgets")
 
-bp.get("")
-bp.post("")
-bp.patch("")
-bp.delete("")
+bp.get("")(budgets_controller.get_budgets)
+bp.post("")(budgets_controller.create_budget)
+bp.patch("/<int:budget_id>")(budgets_controller.update_budget)
+bp.delete("/<int:budget_id>")(budgets_controller.delete_budget)

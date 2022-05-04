@@ -3,6 +3,7 @@ import os
 
 
 def init_app(app):
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+
+    app.config["JWT_SECRET_KEY"] = os.getenv("SECRET")
 
     JWTManager(app)
