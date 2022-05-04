@@ -31,5 +31,3 @@ class CategoryModel(db.Model):
             return value.title()
         if key == 'description':
             return value
-
-
