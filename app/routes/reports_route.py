@@ -1,4 +1,5 @@
 from flask import Blueprint
+from app.controllers.reports_controller import pdf_to_mail
 
 # import controllers
 
@@ -56,7 +57,7 @@ bp.get("/xls_to_mail/<int:budget_id>")
 
 # ROTAS COM RETORNO EM .pdf
 
-bp.get("/pdf_to_mail")
+bp.get("/pdf_to_mail")(pdf_to_mail)
 
 # /pdf_to_mail ( Relatório completo do usuário - Todos os Budgets e expenses do cadastro )
 # /pdf_to_mail?year=2022 ( Query param especificando ano do relatório )

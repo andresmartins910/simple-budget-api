@@ -14,6 +14,7 @@ def user_info():
 
     get_user = UserModel.query.get(user["id"])
 
+
     if(get_user):
         serialized = {
             "id": get_user.id,
