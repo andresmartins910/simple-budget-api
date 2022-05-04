@@ -4,7 +4,7 @@ Essa API foi construída para a aplicação Simple Budget, no intuito de auxilia
 
 URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.herokuapp.com/)
 
-# Users
+# User
 
 ## Rotas sem autenticação
 
@@ -15,11 +15,11 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 ```json
 {
 	"name": "artemis",
-    "email": "kenzinho@mail.com",
+    	"email": "kenzinho@mail.com",
 	"phone": "(27)99999-9999",
-    "password": "123456",
-    "cpf": "123.123.123-89",
-    "birthdate": "13/08/1997"
+    	"password": "123456",
+    	"cpf": "123.123.123-89",
+    	"birthdate": "13/08/1997"
 }
 ```
 
@@ -35,6 +35,25 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 }
 ```
 
+### Autenticação do usuário
+
+`POST /user - FORMATO DA REQUISIÇÃO:`
+
+```json
+{
+	"email": "kenzinho@mail.com",
+	"password": "123456"
+}
+```
+
+`POST /user - FORMATO DA RESPOSTA - STATUS 200:`
+
+```json
+{
+	"access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY1MTY2Nzk1NiwianRpIjoiZmQwOGJjNzItNzQxMC00NmIxLWFhN2EtMjYxZmQ4YTY2YjUxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MTQsIm5hbWUiOiJKb2huIERvZSIsImVtYWlsIjoiam9obmRvZTRAZW1haWwuY29tIiwicGhvbmUiOiIoMDApMTExMTEtMTExMSIsImNwZiI6IjAwMC4wMDAuMDAwLTAwIiwiYmlydGhkYXRlIjoiTW9uLCAwMSBKYW4gMTkwMCAwMDowMDowMCBHTVQifSwibmJmIjoxNjUxNjY3OTU2LCJleHAiOjE2NTE3NTQzNTZ9.lmiQWveq8vFw5gLikkTkxIjKhwKLrT9S3Rzy2dlcwjc"
+}
+```
+
 ## Rotas com autenticação
 
 ### Listagem de informações do usuário
@@ -45,12 +64,12 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 
 ```json
 {
-    "id": 1,
-    "email": "kenzinho@mail.com",
-    "phone": "(27)99999-9999",
-    "name": "kenzinho",
-    "cpf": "123.123.123-89",
-    "birthdate": "13/08/1997"
+    	"id": 1,
+    	"email": "kenzinho@mail.com",
+    	"phone": "(27)99999-9999",
+   	"name": "kenzinho",
+    	"cpf": "123.123.123-89",
+    	"birthdate": "13/08/1997"
 }
 ```
 
@@ -62,7 +81,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 
 ```json
 {
-    "name": "Kenzinho"
+    	"name": "Kenzinho"
 }
 ```
 
@@ -87,7 +106,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 `DELETE /user - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
-    "No body returned for response"
+   	"No body returned for response"
 ```
 
 # Budgets
@@ -172,7 +191,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 `DELETE /budgets/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
-    "No body returned for response"
+    	"No body returned for response"
 ```
 
 # Expenses
@@ -217,7 +236,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 ```json
 {
 	"amount": 120,
-    "description": "4 cheese pizza"
+    	"description": "4 cheese pizza"
 }
 ```
 
@@ -295,7 +314,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 `DELETE /expenses/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
-"No body returned for response"
+	"No body returned for response"
 ```
 
 # Categories
@@ -310,7 +329,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 
 ```json
 {
-    "name": "Hobby",
+    	"name": "Hobby",
 	"description": "Everything related to hobbies"
 }
 ```
@@ -333,7 +352,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 
 ```json
 {
-    "name": "Hobbies",
+    	"name": "Hobbies",
 	"description": "Everything related to hobbies."
 }
 ```
@@ -343,7 +362,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 ```json
 {
 	"id": 1,
-    "name": "Hobbies",
+    	"name": "Hobbies",
 	"description": "Everything related to hobbies."
 }
 ```
@@ -393,7 +412,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 `DELETE /categories/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
-    "No body returned for response"
+    	"No body returned for response"
 ```
 
 # Reports
