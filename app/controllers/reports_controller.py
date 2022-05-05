@@ -178,6 +178,7 @@ def report_with_filter():
     else:
         return jsonify({"error": "This request is not allowed."}), HTTPStatus.BAD_REQUEST
 
+    json_to_excel(data_return)
 
     return jsonify(data_return), HTTPStatus.OK
 

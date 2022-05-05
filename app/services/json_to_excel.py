@@ -4,9 +4,15 @@ def json_to_excel(data):
 
     new_data = {}
 
-    for budget in data["budgets"]:
-        value = pd.DataFrame(budget['expenses'])
-        new_data[f'budget{budget["budget_id"]}'] = value
+    data_dict = list(data)[-1]
+
+    if data_dict == 'expenses':
+            value = pd.DataFrame(data[data_dict])
+            new_data['expenses'] = value
+    else:
+        for dict in data[data_dict]:
+            value = pd.DataFrame(dict['expenses'])
+            new_data[f'budget{dict["budget_id"]}'] = value
 
 
     writer = pd.ExcelWriter('app/reports_temp/report.xlsx')
