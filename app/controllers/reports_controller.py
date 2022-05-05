@@ -6,12 +6,17 @@ from sqlalchemy.orm import Session, Query
 from sqlalchemy import func, or_
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from datetime import datetime as dt
+import json
 
 
 from app.models.users_model import UserModel
 from app.models.budgets_model import BudgetModel
 from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
+
+
+from ..services import send_mail
+
 
 
 @jwt_required()
@@ -69,6 +74,7 @@ def report_with_filter():
 
         expenses = []
 
+
         for expense in registers:
 
             new_expense = {
@@ -82,6 +88,11 @@ def report_with_filter():
 
             expenses.append(new_expense)
 
+            #  teste
+        # to_test = json.dumps(expenses)
+
+        # test_pandas(to_test)
+            # teste
         data_return = {
             "user": current_user['name'],
             "year": year,
@@ -176,7 +187,6 @@ def report_with_filter():
 
     else:
         return jsonify({"error": "This request is not allowed."}), HTTPStatus.BAD_REQUEST
-
 
     return jsonify(data_return), HTTPStatus.OK
 
