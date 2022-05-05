@@ -9,7 +9,7 @@ bp = Blueprint("reports_bp", __name__, url_prefix="/reports")
 
 # ROTAS COM RETORNO EM .xls
 
-bp.get("/xls")(reports_controller.report_with_filter)
+bp.get("/xls")(reports_controller.report_with_filters_by_budgets)
 
 # /xls ( Relatório completo do usuário - Todos os Budgets e expenses do cadastro )
 # /xls?year=2022 ( Query param especificando ano do relatório )

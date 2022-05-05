@@ -57,13 +57,13 @@ def rel_pdf_time_year(year, current_user):
 
         for expense in budget.expenses:
             total_value += expense.amount
-            string_amout = f" R$ {float(expense.amount)}"
+            string_amount = f" R$ {float(expense.amount)}"
             pdf.cell(60, 9, expense.name, border=1)
-            pdf.cell(60, 9, string_amout, ln=1, border=1)
+            pdf.cell(60, 9, string_amount, ln=1, border=1)
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
         pdf.ln(7)
-    
+
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 11)
     pdf.cell(40, 8, f"Total de gastos: ", border="B", ln=0)
@@ -90,7 +90,6 @@ def rel_pdf_time_year(year, current_user):
     pdf.output('app/services/relatoriotest_year.pdf', 'F')
 
     # webbrowser.open_new('app/services/relatoriotest_year.pdf') #abre o PDF no navegador padrão, apenas para teste
-
 
 def rel_pdf_time_month(month, current_user):
     pdf = FPDF('P', 'mm', 'A4')
@@ -130,14 +129,14 @@ def rel_pdf_time_month(month, current_user):
 
         for expense in budget.expenses:
             total_value += expense.amount
-            string_amout = f" R$ {float(expense.amount)}"
+            string_amount = f" R$ {float(expense.amount)}"
             pdf.cell(60, 9, expense.name, border=1)
-            pdf.cell(60, 9, string_amout, ln=1, border=1)
+            pdf.cell(60, 9, string_amount, ln=1, border=1)
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
-        pdf.ln(7)   
+        pdf.ln(7)
 
-    
+
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 11)
     pdf.cell(40, 8, f"Total de gastos: ", border="B", ln=0)
@@ -164,7 +163,6 @@ def rel_pdf_time_month(month, current_user):
     pdf.output('app/services/relatoriotest_month.pdf', 'F')
 
     # webbrowser.open_new('app/services/relatoriotest_month.pdf') #abre o PDF no navegador padrão, apenas para teste
-    
 
 def rel_pdf_time_period(start_time, end_time, current_user):
     pdf = FPDF('P', 'mm', 'A4')
@@ -214,7 +212,7 @@ def rel_pdf_time_period(start_time, end_time, current_user):
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
         pdf.ln(7)
-    
+
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 11)
     pdf.cell(40, 8, f"Total de gastos: ", border="B", ln=0)
@@ -278,7 +276,7 @@ def rel_all_budget(current_user):
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
         pdf.ln(7)
-    
+
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 11)
     pdf.cell(40, 8, f"Total de gastos: ", border="B", ln=0)

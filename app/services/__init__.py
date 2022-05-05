@@ -129,3 +129,47 @@ def send_mail(mail_to_send):
     text = email.as_string()
     mailer.sendmail(email['From'], email['To'], text)
     mailer.quit()
+
+
+
+import os
+from flask import safe_join
+from flask import send_from_directory
+from werkzeug.utils import secure_filename
+
+FILES_DIRECTORY = 'app/reports'
+ALLOWED_EXTENSIONS = ['xlsx', 'pdf']
+
+
+def download_file(file_name:str):
+    ext = get_extension_file(file_name)
+
+    file_path = f'.{FILES_DIRECTORY}/{ext}'
+
+    if not verify_existing_file(file_name, ext):
+        raise FileNotFoundError(
+            {
+                "error": "File not found!"
+            }
+        )
+    return send_from_directory(
+        directory=file_path,
+        path=file_name,
+        as_attachment=True
+    )
+
+def verify_existing_file(file_name:str, ext:str):
+
+    *_, files_list = next(os.walk(f"{FILES_DIRECTORY}/{ext}"))
+    return file_name in files_list
+
+def get_extension_file(file_name:str):
+    ext = file_name.split('.')[-1]
+
+    if not ext in ALLOWED_EXTENSIONS:
+        raise TypeError(
+            {
+                "error": f"'.{ext}' type files are not allowed in report."
+            }
+        )
+    return ext
