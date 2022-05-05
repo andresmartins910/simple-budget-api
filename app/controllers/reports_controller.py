@@ -399,6 +399,7 @@ def pdf_to_mail():
 
             if(len(name) > 0 and len(amount) > 0):
                 create_pdf_by_category(name, amount, title, xlabel)
+                # send_mail("auhuheuhew@gmail.com")
 
                 return {
                     "user": current_user['name'],
@@ -442,6 +443,7 @@ def pdf_to_mail():
 
             if(len(categories) > 0 and len(new_amount) > 0):
                 create_pdf_by_category(categories, new_amount, title, xlabel)
+                # send_mail("auhuheuhew@gmail.com")
 
                 return {
                     "user": current_user['name'],
@@ -498,6 +500,7 @@ def pdf_to_mail():
 
             if(len(name) > 0 and len(amount) > 0):
                 create_pdf_by_category(name, amount, title, xlabel)
+                # send_mail("auhuheuhew@gmail.com")
 
                 return {
                     "user": current_user['name'],
@@ -542,6 +545,7 @@ def pdf_to_mail():
 
             if(len(categories) > 0 and len(new_amount) > 0):
                 create_pdf_by_category(categories, new_amount, title, xlabel)
+                # send_mail("auhuheuhew@gmail.com")
 
                 return {
                     "user": current_user['name'],
