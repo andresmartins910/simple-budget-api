@@ -134,7 +134,7 @@ def report_with_filter():
                 expenses_arr.append(new_expense)
 
             new_budget = {
-                "budget_id": budget.id,
+                "month_year": budget.month_year,
                 "expenses": expenses_arr
             }
 
@@ -228,9 +228,54 @@ def report_with_filter():
 
     elif category_id and year and not initial_date and not final_date:
 
-        # /xls?category_id=1 ( Query param especificando a categoria do expenses no relatório )
+        session: Session = db.session
 
-        ...
+        category = session.query(CategoryModel).get(category_id)
+
+        if not category:
+            return {"error": "category not found."}, HTTPStatus.BAD_REQUEST
+
+        try:
+            year_ok = dt.strptime(year, "%Y")
+        except:
+            return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
+
+        years_first_day = f"01/01/{year}"
+        years_last_day = f"31/12/{year}"
+
+        registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .join(CategoryModel)
+            .filter(UserModel.id == current_user['id'])
+            .filter(ExpenseModel.created_at.between(years_first_day, years_last_day))
+            .filter(CategoryModel.id == category_id)
+            .all()
+        )
+
+        expenses = []
+
+        for expense in registers:
+
+            new_expense = {
+                "name": expense.name,
+                "description": expense.description,
+                "amount": expense.amount,
+                "created_at": expense.created_at,
+                "budget": expense.budget.month_year,
+                "category": expense.category.name
+            }
+
+            expenses.append(new_expense)
+
+        data_return = {
+            "user": current_user['name'],
+            "year": year,
+            "category": category.name,
+            "expenses": expenses
+        }
 
     elif initial_date and final_date and not year and not category_id:
 
