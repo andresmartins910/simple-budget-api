@@ -5,8 +5,8 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import esparto as es
-import pandas as pd
+# import esparto as es
+# import pandas as pd
 
 
 def verify_required_keys(data, trusted_keys):
@@ -35,15 +35,15 @@ def verify_allowed_keys(data, allowed_keys):
 
 def test_pandas(data_json):
 
-    df = pd.read_json(data_json, orient='records')
+    # df = pd.read_json(data_json, orient='records')
 
-    print(f'{df=}')
+    # print(f'{df=}')
     ...
 
 
 def get_report_to_pdf(type:int):
     # Instantiating a Page
-    page = es.Page(title="Research")
+    page = '' # es.Page(title="Research")
 
     # Page layout hierarchy:
     # Page -> Section -> Row -> Column -> Content

@@ -87,7 +87,7 @@ def rel_pdf_time_year(year, current_user):
     pdf.cell(70, 10, f"Email: {current_user['email']}", border=1, ln=1)
     pdf.cell(70, 10, f"Telefone: {current_user['phone']}", border=1, ln=1)
 
-    pdf.output('app/services/relatoriotest_year.pdf', 'F')
+    pdf.output('app/reports_temp/relatoriotest_year.pdf', 'F')
 
     # webbrowser.open_new('app/services/relatoriotest_year.pdf') #abre o PDF no navegador padrão, apenas para teste
 
@@ -161,7 +161,7 @@ def rel_pdf_time_month(month, current_user):
     pdf.cell(70, 10, f"Email: {current_user['email']}", border=1, ln=1)
     pdf.cell(70, 10, f"Telefone: {current_user['phone']}", border=1, ln=1)
 
-    pdf.output('app/services/relatoriotest_month.pdf', 'F')
+    pdf.output('app/reports_temp/relatoriotest_month.pdf', 'F')
 
     # webbrowser.open_new('app/services/relatoriotest_month.pdf') #abre o PDF no navegador padrão, apenas para teste
     
@@ -238,7 +238,7 @@ def rel_pdf_time_period(start_time, end_time, current_user):
     pdf.cell(70, 10, f"Email: {current_user['email']}", border=1, ln=1)
     pdf.cell(70, 10, f"Telefone: {current_user['phone']}", border=1, ln=1)
 
-    pdf.output('app/services/relatoriotest_period.pdf', 'F')
+    pdf.output('app/reports_temp/relatoriotest_period.pdf', 'F')
 
 
 def rel_all_budget(current_user):
@@ -302,7 +302,7 @@ def rel_all_budget(current_user):
     pdf.cell(70, 10, f"Email: {current_user['email']}", border=1, ln=1)
     pdf.cell(70, 10, f"Telefone: {current_user['phone']}", border=1, ln=1)
 
-    pdf.output('app/services/relatoriotest_complet.pdf', 'F')
+    pdf.output('app/reports_temp/relatoriotest_complet.pdf', 'F')
 
 
 def download_file(file_name):

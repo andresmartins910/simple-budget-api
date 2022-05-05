@@ -13,6 +13,7 @@ from app.models.users_model import UserModel
 from app.models.budgets_model import BudgetModel
 from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
+from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
 
 
 from ..services import send_mail
@@ -71,7 +72,8 @@ def report_with_filter():
             .filter(ExpenseModel.created_at.between(years_first_day, years_last_day))
             .all()
         )
-
+        # rel_pdf_time_year(year, current_user)
+        # rel_all_budget(current_user)
         expenses = []
 
 
