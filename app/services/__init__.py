@@ -41,51 +41,6 @@ def test_pandas(data_json):
     ...
 
 
-def get_report_to_pdf(type:int):
-    # Instantiating a Page
-    page = es.Page(title="Research")
-
-    # Page layout hierarchy:
-    # Page -> Section -> Row -> Column -> Content
-
-    # Add or update content
-    # Keys are used as titles
-    page["Introduction"]["Part One"]["Item A"] = "app/services/test/content.md"
-    page["Introduction"]["Part One"]["Item B"] = "app/services/test/image1.jpg"
-
-    # Add content without a title
-    page["Introduction"]["Part One"][""] = "Hello, World!"
-
-    # Replace child at index - useful if no title given
-    page["Introduction"]["Part One"][-1] = "teste"
-
-    # Set content and return input object
-    # Useful in Jupyter Notebook as it will be displayed in cell output
-    page["Methodology"]["Part One"]["Item A"] << "dolor sit amet"
-
-    # Set content and return new layout
-    page["Methodology"]["Part Two"]["Item B"] >> "foobar"
-
-    # Show document structure
-    # page.tree()
-
-    # Remove content
-    del page["Methodology"]["Part One"]["Item A"]
-    del page.methodology.part_two.item_b
-
-    # Access existing content as an attribute
-    page.introduction.part_one.item_a = "app/services/test/image2.jpg"
-    page.introduction.part_one.tree()
-
-    # Save the document
-    if type == 0:
-        page.save_html("app/services/test/report.html")
-        return "", 200
-    else:
-        page.save_pdf("app/services/test/report.pdf")
-        return "", 200
-
-
 def send_mail(mail_to_send):
 
     # VARIAVEIS DE AMBIENTE
@@ -133,9 +88,8 @@ def send_mail(mail_to_send):
 
 
 import os
-from flask import safe_join
 from flask import send_from_directory
-from werkzeug.utils import secure_filename
+
 
 FILES_DIRECTORY = 'app/reports'
 ALLOWED_EXTENSIONS = ['xlsx', 'pdf']

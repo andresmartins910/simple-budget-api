@@ -331,13 +331,14 @@ def report_with_filter_by_budget(budget_id):
     return jsonify(data_return), HTTPStatus.OK
 
 
-
 @jwt_required()
-def report_with_filters_by_budgets():
+def report_with_filters_to_pdf():
 
     session: Session = current_app.db.session
 
-    registers: BaseQuery = session.query(BudgetModel)
+    budgets_registers: Query = session.query(BudgetModel)
+
+    expenses_registers: Query = session.query(ExpenseModel)
 
     current_user = get_jwt_identity()
 
@@ -348,59 +349,45 @@ def report_with_filters_by_budgets():
 
     if not year and not category_id and not initial_date and not final_date:
 
-        session: Session = current_app.db.session
-
-        budgets: Query = (
-            session.query(BudgetModel)
+        registers: Query = (
+            budgets_registers
+            .select_from(BudgetModel)
+            .join(ExpenseModel)
             .join(UserModel)
-            .filter(BudgetModel.user_id == current_user["id"])
+            .filter(UserModel.id == current_user['id'])
             .all()
         )
 
-        budgets_arr = []
+        budgets = []
 
-        for budget in budgets:
+        for budget in registers:
 
-            expenses: Query = (
-                session.query(ExpenseModel)
-                .join(BudgetModel)
-                .join(UserModel)
-                .filter(UserModel.id == current_user["id"])
-                .filter(ExpenseModel.budget_id == budget.id)
-                .all()
-            )
-
-            expenses_arr = []
-
-            for expense in expenses:
-
-                categories: Query = (
-                    session.query(CategoryModel)
-                    .filter(CategoryModel.id == expense.category_id)
-                    .first()
-                )
-
-                new_expense = {
-                    "name": expense.name,
-                    "description": expense.description,
-                    "amount": expense.amount,
-                    "created_at": expense.created_at,
-                    "category": categories.name ,
+                new_budget = {
+                    "month_year": dt.strptime(budget.month_year, "%m/%Y"),
+                    "max_value": budget.max_value,
+                    "expenses": []
                 }
 
-                expenses_arr.append(new_expense)
+                for expense in budget.expenses:
 
-            new_budget = {
-                "month_year": budget.month_year,
-                "expenses": expenses_arr
-            }
+                    new_expense = {
+                        "name": expense.name,
+                        "description": expense.description,
+                        "amount": expense.amount,
+                        "created_at": expense.created_at,
+                        "category": expense.category.name
+                    }
 
-            budgets_arr.append(new_budget)
+                    new_budget['expenses'].append(new_expense)
+
+                budgets.append(new_budget)
 
         data_return = {
             "user": current_user["name"],
-            "budgets": budgets_arr
+            "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
+
+        return jsonify(data_return), HTTPStatus.OK
 
     elif year and not category_id and not initial_date and not final_date:
 
@@ -409,51 +396,52 @@ def report_with_filters_by_budgets():
         except:
             return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
 
-        years_first_day = f"01/01/{year}"
-        years_last_day = f"31/12/{year}"
-
         registers: Query = (
-            registers
+            expenses_registers
             .select_from(ExpenseModel)
             .join(BudgetModel)
             .join(UserModel)
             .filter(UserModel.id == current_user['id'])
-            .filter(ExpenseModel.created_at.between(years_first_day, years_last_day))
             .all()
         )
 
-        expenses = []
-
+        budgets = []
 
         for expense in registers:
 
-            new_expense = {
-                "name": expense.name,
-                "description": expense.description,
-                "amount": expense.amount,
-                "created_at": expense.created_at,
-                "budget": expense.budget.month_year,
-                "category": expense.category.name
-            }
+            year_validate = dt.strptime(expense.budget.month_year, "%m/%Y").strftime("%Y")
 
-            expenses.append(new_expense)
+            if year_validate == year:
 
-            #  teste
-        # to_test = json.dumps(expenses)
+                new_budget = {
+                                "month_year": dt.strptime(expense.budget.month_year, "%m/%Y"),
+                                "expenses": []
+                            }
 
-        # test_pandas(to_test)
-            # teste
+                for expense in registers:
+
+                    if dt.strptime(expense.budget.month_year, "%m/%Y") == new_budget['month_year']:
+
+                        new_expense = {
+                                    "name": expense.name,
+                                    "description": expense.description,
+                                    "amount": expense.amount,
+                                    "created_at": expense.created_at,
+                                }
+
+                        new_budget["expenses"].append(new_expense)
+
+                budgets.append(new_budget)
+
         data_return = {
             "user": current_user['name'],
             "year": year,
-            "expenses": expenses
+            "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
-        rel_pdf_time_year()
+        return jsonify(data_return), HTTPStatus.OK
 
     elif category_id and not year and not initial_date and not final_date:
-
-        session: Session = db.session
 
         category = session.query(CategoryModel).get(category_id)
 
@@ -461,7 +449,7 @@ def report_with_filters_by_budgets():
             return {"error": "category not found."}, HTTPStatus.BAD_REQUEST
 
         registers: Query = (
-            registers
+            expenses_registers
             .select_from(ExpenseModel)
             .join(BudgetModel)
             .join(UserModel)
@@ -471,25 +459,37 @@ def report_with_filters_by_budgets():
             .all()
         )
 
-        # expenses = []
+        budgets = []
 
-        # for expense in registers:
+        for expense in registers:
 
-        #     new_expense = {
-        #         "name": expense.name,
-        #         "description": expense.description,
-        #         "amount": expense.amount,
-        #         "created_at": expense.created_at,
-        #         "budget": expense.budget.month_year
-        #     }
+            new_budget = {
+                "month_year": dt.strptime(expense.budget.month_year, "%m/%Y"),
+                "expenses": []
+            }
 
-        #     expenses.append(new_expense)
+            for expense in registers:
 
-        # data_return = {
-        #     "user": current_user['name'],
-        #     "category": category.name,
-        #     "expenses": expenses
-        # }
+                if dt.strptime(expense.budget.month_year, "%m/%Y") == new_budget['month_year']:
+
+                    new_expense = {
+                                "name": expense.name,
+                                "description": expense.description,
+                                "amount": expense.amount,
+                                "created_at": expense.created_at,
+                            }
+
+                    new_budget["expenses"].append(new_expense)
+
+            budgets.append(new_budget)
+
+        data_return = {
+            "user": current_user['name'],
+            "category": category.name,
+            "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
+        }
+
+        return jsonify(data_return), HTTPStatus.OK
 
     elif category_id and year and not initial_date and not final_date:
 
@@ -505,42 +505,53 @@ def report_with_filters_by_budgets():
         except:
             return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
 
-        years_first_day = f"01/01/{year}"
-        years_last_day = f"31/12/{year}"
-
         registers: Query = (
-            registers
+            expenses_registers
             .select_from(ExpenseModel)
             .join(BudgetModel)
             .join(UserModel)
             .join(CategoryModel)
             .filter(UserModel.id == current_user['id'])
-            .filter(ExpenseModel.created_at.between(years_first_day, years_last_day))
             .filter(CategoryModel.id == category_id)
             .all()
         )
 
-        expenses = []
+        budgets = []
 
         for expense in registers:
 
-            new_expense = {
-                "name": expense.name,
-                "description": expense.description,
-                "amount": expense.amount,
-                "created_at": expense.created_at,
-                "budget": expense.budget.month_year,
-                "category": expense.category.name
-            }
+            year_validate = dt.strptime(expense.budget.month_year, "%m/%Y").strftime("%Y")
 
-            expenses.append(new_expense)
+            if year_validate == year:
+
+                new_budget = {
+                                "month_year": dt.strptime(expense.budget.month_year, "%m/%Y"),
+                                "expenses": []
+                            }
+
+                for expense in registers:
+
+                    if dt.strptime(expense.budget.month_year, "%m/%Y") == new_budget['month_year']:
+
+                        new_expense = {
+                                    "name": expense.name,
+                                    "description": expense.description,
+                                    "amount": expense.amount,
+                                    "created_at": expense.created_at,
+                                }
+
+                        new_budget["expenses"].append(new_expense)
+
+                budgets.append(new_budget)
 
         data_return = {
             "user": current_user['name'],
             "year": year,
             "category": category.name,
-            "expenses": expenses
+            "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
+
+        return jsonify(data_return), HTTPStatus.OK
 
     elif initial_date and final_date and not year and not category_id:
 
@@ -551,7 +562,7 @@ def report_with_filters_by_budgets():
             return {"error": "start and end dates must be format 'dd/mm/YYYY'."}, HTTPStatus.BAD_REQUEST
 
         registers: Query = (
-            registers
+            expenses_registers
             .select_from(ExpenseModel)
             .join(BudgetModel)
             .join(UserModel)
@@ -579,10 +590,56 @@ def report_with_filters_by_budgets():
             "user": current_user['name'],
             "initial_date": initial_date,
             "final_date": final_date,
-            "expenses": expenses
+            "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
         }
+
+        return jsonify(data_return), HTTPStatus.OK
 
     else:
         return jsonify({"error": "This request is not allowed."}), HTTPStatus.BAD_REQUEST
 
+
+@jwt_required()
+def report_with_filter_by_budget_to_pdf(budget_id):
+
+    session: Session = db.session()
+
+    registers: BaseQuery = session.query(ExpenseModel)
+    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
+
+    if not budget:
+        return {"error": "Budget not found!"}, HTTPStatus.NOT_FOUND
+
+    current_user = get_jwt_identity()
+
+    registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(ExpenseModel.budget_id == budget_id)
+            .filter(BudgetModel.id == budget_id)
+            .filter(UserModel.id == current_user['id'])
+            .all()
+        )
+
+    expenses = []
+
+    for expense in registers:
+        new_expense = {
+            "name": expense.name,
+            "description": expense.description,
+            "amount": expense.amount,
+            "created_at": expense.created_at
+        }
+
+        expenses.append(new_expense)
+
+    data_return = {
+        "user": current_user['name'],
+        "budget": budget.month_year,
+        "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
+    }
+
     return jsonify(data_return), HTTPStatus.OK
+
