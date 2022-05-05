@@ -8,7 +8,6 @@ bp = Blueprint("reports_bp", __name__, url_prefix="/reports")
 
 # ROTAS COM RETORNO EM .xls
 
-bp.get("/all")(reports_controller.all_report)
 bp.get("/xls")(reports_controller.report_with_filter)
 
 # /xls ( Relatório completo do usuário - Todos os Budgets e expenses do cadastro )
