@@ -5,8 +5,10 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import esparto as es
-import pandas as pd
+from flask import send_from_directory
+
+FILES_DIRECTORY = 'app/reports'
+ALLOWED_EXTENSIONS = ['xlsx', 'pdf']
 
 
 def verify_required_keys(data, trusted_keys):
@@ -31,14 +33,6 @@ def verify_allowed_keys(data, allowed_keys):
     for key in data.keys():
         if key not in allowed_keys:
             raise KeyError(err_missing_key)
-
-
-def test_pandas(data_json):
-
-    df = pd.read_json(data_json, orient='records')
-
-    print(f'{df=}')
-    ...
 
 
 def send_mail(mail_to_send):
@@ -84,15 +78,6 @@ def send_mail(mail_to_send):
     text = email.as_string()
     mailer.sendmail(email['From'], email['To'], text)
     mailer.quit()
-
-
-
-import os
-from flask import send_from_directory
-
-
-FILES_DIRECTORY = 'app/reports'
-ALLOWED_EXTENSIONS = ['xlsx', 'pdf']
 
 
 def download_file(file_name:str):

@@ -13,7 +13,8 @@ from app.models.users_model import UserModel
 from app.models.budgets_model import BudgetModel
 from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
-from app.services.pdf_service import rel_pdf_time_year
+
+from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
 
 
 from ..services import send_mail, download_file
@@ -123,7 +124,6 @@ def report_with_filter():
 
         expenses = []
 
-
         for expense in registers:
 
             new_expense = {
@@ -137,11 +137,6 @@ def report_with_filter():
 
             expenses.append(new_expense)
 
-            #  teste
-        # to_test = json.dumps(expenses)
-
-        # test_pandas(to_test)
-            # teste
         data_return = {
             "user": current_user['name'],
             "year": year,
