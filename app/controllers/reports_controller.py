@@ -14,7 +14,7 @@ from app.models.budgets_model import BudgetModel
 from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
 
-from app.services.pdf_service import rel_all_budget, rel_pdf_time_month, rel_pdf_time_period, rel_pdf_time_year
+from app.services.pdf_service import rel_all_budget, rel_by_category, rel_by_category_year, rel_pdf_time_month, rel_pdf_time_period, rel_pdf_time_year
 
 
 from ..services import send_mail, download_file
@@ -482,7 +482,7 @@ def report_with_filters_to_pdf():
             "category": category.name,
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
-
+        rel_by_category(data_return, current_user)
         return jsonify(data_return), HTTPStatus.OK
 
     elif category_id and year and not initial_date and not final_date:
@@ -544,7 +544,7 @@ def report_with_filters_to_pdf():
             "category": category.name,
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
-
+        rel_by_category_year(data_return, current_user)
         return jsonify(data_return), HTTPStatus.OK
 
     elif initial_date and final_date and not year and not category_id:
