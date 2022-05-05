@@ -7,6 +7,7 @@ from sqlalchemy import func, or_
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from datetime import datetime as dt
 
+from app.services.json_to_excel import json_to_excel
 
 from app.models.users_model import UserModel
 from app.models.budgets_model import BudgetModel
@@ -281,6 +282,8 @@ def all_report():
         "user": current_user["name"],
         "budgets": budgets_arr
     }
+
+    json_to_excel(return_data)
 
     return jsonify(return_data), HTTPStatus.OK
 
