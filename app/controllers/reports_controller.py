@@ -14,7 +14,7 @@ from app.models.budgets_model import BudgetModel
 from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
 
-from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
+from app.services.pdf_service import rel_all_budget, rel_pdf_time_month, rel_pdf_time_period, rel_pdf_time_year
 
 
 from ..services import send_mail, download_file
@@ -143,7 +143,6 @@ def report_with_filter():
             "expenses": expenses
         }
 
-        rel_pdf_time_year()
 
     elif category_id and not year and not initial_date and not final_date:
 
@@ -381,7 +380,7 @@ def report_with_filters_to_pdf():
             "user": current_user["name"],
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
-
+        rel_all_budget(data_return, current_user)
         return jsonify(data_return), HTTPStatus.OK
 
     elif year and not category_id and not initial_date and not final_date:
@@ -433,7 +432,7 @@ def report_with_filters_to_pdf():
             "year": year,
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
-
+        rel_pdf_time_year(data_return, current_user)
         return jsonify(data_return), HTTPStatus.OK
 
     elif category_id and not year and not initial_date and not final_date:
@@ -587,7 +586,7 @@ def report_with_filters_to_pdf():
             "final_date": final_date,
             "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
         }
-
+        rel_pdf_time_period(data_return, current_user)
         return jsonify(data_return), HTTPStatus.OK
 
     else:
@@ -625,7 +624,8 @@ def report_with_filter_by_budget_to_pdf(budget_id):
             "name": expense.name,
             "description": expense.description,
             "amount": expense.amount,
-            "created_at": expense.created_at
+            "created_at": expense.created_at,
+            "category":  expense.category.name,
         }
 
         expenses.append(new_expense)
@@ -635,6 +635,6 @@ def report_with_filter_by_budget_to_pdf(budget_id):
         "budget": budget.month_year,
         "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
     }
-
+    rel_pdf_time_month(data_return, current_user)
     return jsonify(data_return), HTTPStatus.OK
 
