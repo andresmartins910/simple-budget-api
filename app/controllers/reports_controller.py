@@ -21,6 +21,9 @@ from ..services import send_mail
 from ..services.pdf_service import normalize_amount
 from ..services.pdf_service import create_pdf
 
+from ..services.pdf_service import rel_pdf_time_month, rel_pdf_time_period, rel_pdf_time_year
+from ..services.pdf_service import rel_all_budget, rel_by_category, rel_by_category_year
+
 
 @jwt_required()
 def download_xlsx():
@@ -128,6 +131,7 @@ def email_pdf_budget_id(budget_id):
 
     except:
         return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
 
 
 
@@ -255,7 +259,6 @@ def report_with_filter():
             "expenses": expenses
         }
 
-        rel_pdf_time_year()
 
     elif category_id and not year and not initial_date and not final_date:
 
@@ -494,7 +497,10 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
+        rel_all_budget(data_return, current_user)
+
         return subject
+
 
     elif year and not category_id and not initial_date and not final_date:
 
@@ -549,7 +555,10 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
+        rel_pdf_time_year(data_return, current_user)
+
         return subject
+
 
     elif category_id and not year and not initial_date and not final_date:
 
@@ -601,7 +610,10 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
+        rel_by_category(data_return, current_user)
+
         return subject
+
 
     elif category_id and year and not initial_date and not final_date:
 
@@ -665,7 +677,10 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
+        rel_by_category_year(data_return, current_user)
+
         return subject
+
 
     elif initial_date and final_date and not year and not category_id:
 
@@ -709,6 +724,8 @@ def report_with_filters_to_pdf():
             "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
         }
 
+        rel_pdf_time_period(data_return, current_user)
+
         return subject
 
     else:
@@ -724,7 +741,8 @@ def report_with_filter_by_budget_to_pdf(registers, user, budget):
             "name": expense.name,
             "description": expense.description,
             "amount": expense.amount,
-            "created_at": expense.created_at
+            "created_at": expense.created_at,
+            "category":  expense.category.name,
         }
 
         expenses.append(new_expense)
@@ -735,7 +753,7 @@ def report_with_filter_by_budget_to_pdf(registers, user, budget):
         "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
     }
 
-    return jsonify(data_return), HTTPStatus.OK
+    rel_pdf_time_month(data_return, user)
 
 
 def pdf_chart_to_mail():
