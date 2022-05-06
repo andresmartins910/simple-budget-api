@@ -1,5 +1,4 @@
 import os
-import webbrowser
 
 from flask import send_from_directory
 from app.configs.database import db
@@ -11,7 +10,11 @@ from flask_sqlalchemy import BaseQuery
 from fpdf import FPDF
 from sqlalchemy.orm import Query, Session
 from werkzeug.utils import secure_filename
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
+
+REPORTS_TEMP = os.getenv("REPORTS_TEMP")
 
 def rel_pdf_time_year(year, current_user):
     pdf = FPDF('P', 'mm', 'A4')
@@ -303,12 +306,45 @@ def rel_all_budget(current_user):
     pdf.output('app/reports_temp/relatoriotest_complet.pdf', 'F')
 
 
-def download_file(file_name):
-    try:
-        return send_from_directory(
-            directory=f"app/services",
-            path=f"{file_name}",
-            as_attachment=True
-        )
-    except:
-        print('error')
+def normalize_amount(expenses):
+    amount = []
+    categories = []
+    total = []
+
+    for i in expenses:
+        if(i.category.name in categories):
+            for j in total:
+                if(i.category.name == j["category"]):
+                    j["amount"] = j["amount"] + i.amount
+
+        else:
+            amount.append(i.amount)
+            categories.append(i.category.name)
+
+            object = {
+                "name": i.name,
+                "description": i.description,
+                "created_at": i.created_at,
+                "category": i.category.name,
+                "amount": i.amount
+            }
+
+            total.append(object)
+
+    return total, categories
+
+
+def create_pdf(categories, amount, title, xlabel):
+    os.makedirs(f"app/{REPORTS_TEMP}", exist_ok=True)
+
+    with PdfPages(f"app/{REPORTS_TEMP}/report.pdf") as pdf:
+
+        plt.bar(categories, amount)
+        plt.xlabel(xlabel, fontsize=12)
+        plt.ylabel("Despesas", fontsize=12)
+
+        plt.title(title)
+
+        pdf.savefig()
+        plt.close()
+

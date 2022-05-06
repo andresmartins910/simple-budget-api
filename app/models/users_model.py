@@ -1,6 +1,6 @@
 from app.configs.database import db
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, backref, relationship
 from dataclasses import dataclass
 import re
 from app.exceptions.users_exceptions import PhoneExc, CPFExc, BirthdateExc
@@ -17,7 +17,6 @@ class UserModel(db.Model):
     phone: str
     cpf: str
     birthdate: str
-
 
     __tablename__ = "user"
 

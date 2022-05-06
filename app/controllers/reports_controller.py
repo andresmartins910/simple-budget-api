@@ -1,23 +1,136 @@
-from http import HTTPStatus
-from flask import current_app, jsonify, request
-from app.configs.database import db
-from flask_sqlalchemy import BaseQuery
-from sqlalchemy.orm import Session, Query
-from sqlalchemy import func, or_
-from flask_jwt_extended import get_jwt_identity, jwt_required
-from datetime import datetime as dt
 import json
+import os
+from datetime import datetime as dt
+from http import HTTPStatus
 
-
-from app.models.users_model import UserModel
+from app.configs.database import db
 from app.models.budgets_model import BudgetModel
-from app.models.expenses_model import ExpenseModel
 from app.models.categories_model import CategoryModel
-
+from app.models.expenses_model import ExpenseModel
+from app.models.users_model import UserModel
 from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
+from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_sqlalchemy import BaseQuery
+
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Query, Session
+
+from ..services import download_file
+from ..services import send_mail
+from ..services.pdf_service import normalize_amount
+from ..services.pdf_service import create_pdf
 
 
-from ..services import send_mail, download_file
+@jwt_required()
+def download_xlsx():
+
+    ...
+@jwt_required()
+def download_xlsx_budget_id(budget_id):
+
+    ...
+@jwt_required()
+def download_pdf():
+
+    ...
+@jwt_required()
+def download_pdf_budget_id(budget_id):
+
+
+    session: Session = db.session()
+
+    registers: BaseQuery = session.query(ExpenseModel)
+    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
+
+    if not budget:
+        return {"error": "Budget not found!"}, HTTPStatus.NOT_FOUND
+
+    current_user = get_jwt_identity()
+
+    registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(ExpenseModel.budget_id == budget_id)
+            .filter(BudgetModel.id == budget_id)
+            .filter(UserModel.id == current_user['id'])
+            .all()
+        )
+
+    try:
+        # report_with_filter_by_budget_to_pdf(registers, current_user, budget)
+        # pdf_chart_to_mail_by_budget_id(registers, budget)
+        download_file("report.pdf")
+
+        return "", HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@jwt_required()
+def email_xlsx():
+
+    ...
+@jwt_required()
+def email_xlsx_budget_id(budget_id):
+
+    ...
+@jwt_required()
+def email_pdf():
+
+
+    try:
+        # subject = report_with_filters_to_pdf(registers, current_user, budget)
+        pdf_chart_to_mail()
+        send_mail("brunobgr0810@gmail.com", "teste")
+        # send_mail(current_user['email'], subject)
+
+        return "", HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@jwt_required()
+def email_pdf_budget_id(budget_id):
+
+    session: Session = db.session()
+
+    registers: BaseQuery = session.query(ExpenseModel)
+    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
+
+    if not budget:
+        return {"error": "Budget not found!"}, HTTPStatus.NOT_FOUND
+
+    current_user = get_jwt_identity()
+
+    registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(ExpenseModel.budget_id == budget_id)
+            .filter(BudgetModel.id == budget_id)
+            .filter(UserModel.id == current_user['id'])
+            .all()
+        )
+    subject = f'Mensal - {budget.month_year}'
+    try:
+        # report_with_filter_by_budget_to_pdf(registers, current_user, budget)
+        pdf_chart_to_mail_by_budget_id(registers, budget)
+        send_mail("brunobgr0810@gmail.com", subject)
+        # send_mail(current_user['email'], subject)
+
+        return "", HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+
 
 
 def download():
@@ -30,7 +143,6 @@ def download():
         return e_not_found.args[0], HTTPStatus.NOT_FOUND
 
     return downloaded_file, HTTPStatus.OK
-
 
 @jwt_required()
 def report_with_filter():
@@ -281,7 +393,6 @@ def report_with_filter():
 
     return jsonify(data_return), HTTPStatus.OK
 
-
 @jwt_required()
 def report_with_filter_by_budget(budget_id):
     session: Session = db.session()
@@ -326,7 +437,6 @@ def report_with_filter_by_budget(budget_id):
     return jsonify(data_return), HTTPStatus.OK
 
 
-@jwt_required()
 def report_with_filters_to_pdf():
 
     session: Session = current_app.db.session
@@ -343,6 +453,8 @@ def report_with_filters_to_pdf():
     final_date = request.args.get("final_date", type=str)
 
     if not year and not category_id and not initial_date and not final_date:
+
+        subject = f"Completo - {current_user['name']}"
 
         registers: Query = (
             budgets_registers
@@ -382,7 +494,7 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
-        return jsonify(data_return), HTTPStatus.OK
+        return subject
 
     elif year and not category_id and not initial_date and not final_date:
 
@@ -390,6 +502,8 @@ def report_with_filters_to_pdf():
             year_ok = dt.strptime(year, "%Y")
         except:
             return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
+
+        subject = f"Anual - {year}"
 
         registers: Query = (
             expenses_registers
@@ -422,6 +536,7 @@ def report_with_filters_to_pdf():
                                     "description": expense.description,
                                     "amount": expense.amount,
                                     "created_at": expense.created_at,
+                                    "category": expense.category.name
                                 }
 
                         new_budget["expenses"].append(new_expense)
@@ -434,7 +549,7 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
-        return jsonify(data_return), HTTPStatus.OK
+        return subject
 
     elif category_id and not year and not initial_date and not final_date:
 
@@ -442,6 +557,8 @@ def report_with_filters_to_pdf():
 
         if not category:
             return {"error": "category not found."}, HTTPStatus.BAD_REQUEST
+
+        subject = f"Por Categoria - {category.name}"
 
         registers: Query = (
             expenses_registers
@@ -484,7 +601,7 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
-        return jsonify(data_return), HTTPStatus.OK
+        return subject
 
     elif category_id and year and not initial_date and not final_date:
 
@@ -499,6 +616,8 @@ def report_with_filters_to_pdf():
             year_ok = dt.strptime(year, "%Y")
         except:
             return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
+
+        subject = f"Por ano e categoria - {year}/{category.name}"
 
         registers: Query = (
             expenses_registers
@@ -546,7 +665,7 @@ def report_with_filters_to_pdf():
             "budgets": sorted(budgets, key=lambda budget: budget['month_year'])
         }
 
-        return jsonify(data_return), HTTPStatus.OK
+        return subject
 
     elif initial_date and final_date and not year and not category_id:
 
@@ -555,6 +674,8 @@ def report_with_filters_to_pdf():
             final_date_ok = dt.strptime(final_date, "%d/%m/%Y")
         except:
             return {"error": "start and end dates must be format 'dd/mm/YYYY'."}, HTTPStatus.BAD_REQUEST
+
+        subject = f"por Período - {initial_date}-{final_date}"
 
         registers: Query = (
             expenses_registers
@@ -588,35 +709,13 @@ def report_with_filters_to_pdf():
             "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
         }
 
-        return jsonify(data_return), HTTPStatus.OK
+        return subject
 
     else:
         return jsonify({"error": "This request is not allowed."}), HTTPStatus.BAD_REQUEST
 
 
-@jwt_required()
-def report_with_filter_by_budget_to_pdf(budget_id):
-
-    session: Session = db.session()
-
-    registers: BaseQuery = session.query(ExpenseModel)
-    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
-
-    if not budget:
-        return {"error": "Budget not found!"}, HTTPStatus.NOT_FOUND
-
-    current_user = get_jwt_identity()
-
-    registers: Query = (
-            registers
-            .select_from(ExpenseModel)
-            .join(BudgetModel)
-            .join(UserModel)
-            .filter(ExpenseModel.budget_id == budget_id)
-            .filter(BudgetModel.id == budget_id)
-            .filter(UserModel.id == current_user['id'])
-            .all()
-        )
+def report_with_filter_by_budget_to_pdf(registers, user, budget):
 
     expenses = []
 
@@ -631,10 +730,253 @@ def report_with_filter_by_budget_to_pdf(budget_id):
         expenses.append(new_expense)
 
     data_return = {
-        "user": current_user['name'],
+        "user": user['name'],
         "budget": budget.month_year,
         "expenses": sorted(expenses, key=lambda expense: expense['created_at'])
     }
 
     return jsonify(data_return), HTTPStatus.OK
+
+
+def pdf_chart_to_mail():
+
+    data = request.args
+
+    current_user = get_jwt_identity()
+
+    session: Session = current_app.db.session
+
+    registers: BaseQuery = session.query(ExpenseModel)
+
+    accepted_args = []
+
+    for i in data:
+        accepted_args.append(i)
+
+    if(accepted_args):
+
+        if("year" in accepted_args and "category_id" in accepted_args):
+
+            year = data["year"]
+            category_id = data["category_id"]
+
+            registers: Query = session.query(ExpenseModel)
+
+            session: Session = db.session
+
+            category = session.query(CategoryModel).get(category_id)
+
+            if not category:
+                return {"error": "category not found."}, HTTPStatus.BAD_REQUEST
+
+            try:
+                year_ok = dt.strptime(year, "%Y")
+            except:
+                return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
+
+            years_first_day = f"01/01/{year}"
+            years_last_day = f"31/12/{year}"
+
+            registers: Query = (
+                registers
+                .select_from(ExpenseModel)
+                .join(BudgetModel)
+                .join(UserModel)
+                .join(CategoryModel)
+                .filter(UserModel.id == current_user['id'])
+                .filter(ExpenseModel.created_at.between(years_first_day, years_last_day))
+                .filter(CategoryModel.id == category_id)
+                .all()
+            )
+
+            expenses = []
+            name = []
+            amount = []
+            title = f"Despesas do Ano de {year} e da Categoria {category.name}"
+            xlabel = "Nome das Despesas"
+
+            for expense in registers:
+                name.append(expense.name)
+                amount.append(expense.amount)
+
+                new_expense = {
+                    "name": expense.name,
+                    "description": expense.description,
+                    "amount": expense.amount,
+                    "created_at": expense.created_at,
+                    "budget": expense.budget.month_year,
+                    "category": expense.category.name
+                }
+
+                expenses.append(new_expense)
+
+            if(len(name) > 0 and len(amount) > 0):
+                create_pdf(name, amount, title, xlabel)
+
+                return "", HTTPStatus.NO_CONTENT
+
+
+        elif("year" in accepted_args):
+            try:
+                year_ok = dt.strptime(data["year"], "%Y")
+
+            except:
+                return {"error": "year must be format 'YYYY'"}, HTTPStatus.BAD_REQUEST
+
+            year = data["year"]
+
+            years_first_day = f"01/01/{year}"
+            years_last_day = f"31/12/{year}"
+
+            title = f"Despesas do Ano de {year}"
+            xlabel = "Categorias"
+
+            registers: Query = (
+                registers
+                .select_from(ExpenseModel)
+                .join(BudgetModel)
+                .join(UserModel)
+                .filter(UserModel.id == current_user['id'])
+                .filter(ExpenseModel.created_at.between(years_first_day, years_last_day))
+                .all()
+            )
+
+            total, categories = normalize_amount(registers)
+
+            new_amount = []
+
+            for i in total:
+                new_amount.append(i["amount"])
+
+            if(len(categories) > 0 and len(new_amount) > 0):
+                create_pdf(categories, new_amount, title, xlabel)
+
+                return "", HTTPStatus.NO_CONTENT
+
+            return {
+                "error": "Insufficient data"
+            }, HTTPStatus.BAD_REQUEST
+
+
+        elif("category_id" in accepted_args):
+            category_id = data["category_id"]
+
+            session: Session = db.session
+
+            category = session.query(CategoryModel).get(category_id)
+
+            if not category:
+                return {"error": "category not found."}, HTTPStatus.BAD_REQUEST
+
+            registers: Query = (
+                registers
+                .select_from(ExpenseModel)
+                .join(BudgetModel)
+                .join(UserModel)
+                .join(CategoryModel)
+                .filter(UserModel.id == current_user['id'])
+                .filter(CategoryModel.id == category_id)
+                .all()
+            )
+
+            expenses = []
+            name = []
+            amount = []
+            title = f"Despesas da Categoria {category.name}"
+            xlabel = "Nome das Despesas"
+
+            for expense in registers:
+                name.append(expense.name)
+                amount.append(expense.amount)
+
+                new_expense = {
+                    "name": expense.name,
+                    "description": expense.description,
+                    "amount": expense.amount,
+                    "created_at": expense.created_at,
+                    "budget": expense.budget.month_year
+                }
+
+                expenses.append(new_expense)
+
+
+            if(len(name) > 0 and len(amount) > 0):
+                create_pdf(name, amount, title, xlabel)
+
+                return "", HTTPStatus.NO_CONTENT
+
+            return {
+                "error": "Insufficient data"
+            }, HTTPStatus.BAD_REQUEST
+
+
+        elif("initial_date" in accepted_args and "final_date" in accepted_args):
+            initial_date = data["initial_date"]
+            final_date = data["final_date"]
+
+            try:
+                initial_date_ok = dt.strptime(initial_date, "%d/%m/%Y")
+                final_date_ok = dt.strptime(final_date, "%d/%m/%Y")
+            except:
+                return {"error": "start and end dates must be format 'dd/mm/YYYY'."}, HTTPStatus.BAD_REQUEST
+
+            registers: Query = (
+                registers
+                .select_from(ExpenseModel)
+                .join(BudgetModel)
+                .join(UserModel)
+                .filter(UserModel.id == current_user['id'])
+                .filter(ExpenseModel.created_at.between(initial_date, final_date))
+                .all()
+            )
+
+            total, categories = normalize_amount(registers)
+            title = f"Despesas da data entre {initial_date} e {final_date}"
+            xlabel = "Categorias"
+
+            new_amount = []
+
+            for i in total:
+                new_amount.append(i["amount"])
+
+
+            if(len(categories) > 0 and len(new_amount) > 0):
+                create_pdf(categories, new_amount, title, xlabel)
+
+                return "", HTTPStatus.NO_CONTENT
+
+            return {
+                "error": "Insufficient data or Wrong Data"
+            }, HTTPStatus.BAD_REQUEST
+
+
+        else:
+            return {
+                "error": "Wrong Arguments for Reports"
+            }, HTTPStatus.BAD_REQUEST
+
+
+def pdf_chart_to_mail_by_budget_id(registers, budget):
+
+    amount = []
+
+    total, categories = normalize_amount(registers)
+    title = f"Despesas do Budget de {budget.month_year}"
+    xlabel = "Categorias"
+
+    for i in total:
+        amount.append(i["amount"])
+
+    if(len(categories) > 0 and len(amount) > 0):
+        create_pdf(categories, amount, title, xlabel)
+
+        return "", HTTPStatus.NO_CONTENT
+
+    return {
+        "error": "Insufficient data"
+    }, HTTPStatus.BAD_REQUEST
+
+
+
+
 

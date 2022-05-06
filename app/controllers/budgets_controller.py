@@ -36,6 +36,8 @@ def create_budget():
 
     current_user = get_jwt_identity()
 
+    print(current_user)
+
     data = request.get_json()
 
     try:

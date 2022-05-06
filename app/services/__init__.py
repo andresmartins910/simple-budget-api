@@ -5,9 +5,9 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from flask import send_from_directory
+from flask import send_file, send_from_directory
 
-FILES_DIRECTORY = 'app/reports'
+FILES_DIRECTORY = 'reports_temp'
 ALLOWED_EXTENSIONS = ['xlsx', 'pdf']
 
 
@@ -35,7 +35,7 @@ def verify_allowed_keys(data, allowed_keys):
             raise KeyError(err_missing_key)
 
 
-def send_mail(mail_to_send):
+def send_mail(mail_to_send, subject):
 
     # VARIAVEIS DE AMBIENTE
     fromaddr = os.getenv('APP_MAIL')
@@ -49,7 +49,7 @@ def send_mail(mail_to_send):
     # CONFIG MAIL
     email['From'] = fromaddr
     email['To'] = mail_to_send
-    email['Subject'] = 'Relatório'
+    email['Subject'] = f'Relatório {subject}'
 
     # CORPO DO EMAIL
     message = """
@@ -81,34 +81,24 @@ def send_mail(mail_to_send):
 
 
 def download_file(file_name:str):
-    ext = get_extension_file(file_name)
 
-    file_path = f'.{FILES_DIRECTORY}/{ext}'
+    file_path = f'{FILES_DIRECTORY}/{file_name}'
 
-    if not verify_existing_file(file_name, ext):
+    if not verify_existing_file(file_name):
         raise FileNotFoundError(
             {
                 "error": "File not found!"
             }
         )
     return send_from_directory(
-        directory=file_path,
+        directory="/reports_temp/report.pdf",
         path=file_name,
         as_attachment=True
     )
 
-def verify_existing_file(file_name:str, ext:str):
 
-    *_, files_list = next(os.walk(f"{FILES_DIRECTORY}/{ext}"))
+def verify_existing_file(file_name:str):
+
+    *_, files_list = next(os.walk(f'app/{FILES_DIRECTORY}'))
     return file_name in files_list
 
-def get_extension_file(file_name:str):
-    ext = file_name.split('.')[-1]
-
-    if not ext in ALLOWED_EXTENSIONS:
-        raise TypeError(
-            {
-                "error": f"'.{ext}' type files are not allowed in report."
-            }
-        )
-    return ext
