@@ -416,53 +416,150 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 ```
 
 # Reports
+*É necessário autenticação por Bearer Token em TODAS as rotas de reports. Não possui corpo de requisição.*
+*Filtragem de reports através de query params*
 
-## Requisições
 
-`GET /reports/pdf_to_mail?year=2021 - REQUISIÇÃO`
-
-`GET /reports/pdf_to_mail?category_id=3 - REQUISIÇÃO`
-
-`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
-
-`GET /reports/pdf_to_mail/1 - REQUISIÇÃO`
-
-`GET /reports/pdf_to_mail?year=2022&category_id=5 - REQUISIÇÃO`
-
-`GET /reports/xls?year=2021 - REQUISIÇÃO`
-
-`GET /reports/xls?category_id=3 - REQUISIÇÃO`
-
-`GET /reports/xls?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
-
-`GET /reports/xls/1 - REQUISIÇÃO`
-
-`GET /reports/xls?year=2022&category_id=5 - REQUISIÇÃO`
+# Envio de relatórios PDF por email.
 
 #
 
-## Retorno das Rotas que foram Aceitas
+# *Gráfico e tabela*
+
+## Obter relatório dos gastos por ano.
+*Recebe o ano que deseja gerar o relatório.*
+`GET /reports/pdf_to_mail?year=2021 - REQUISIÇÃO`
 
 
-`GET /reports/pdf_to_mail?year=2021 - FORMATO DA RESPOSTA - 204` 
 
-`GET /reports/pdf_to_mail?category_id=3 - FORMATO DA RESPOSTA - 204`
+## Obter relatório dos gastos por categoria.
+*Recebe o id da categoria que deseja gerar o relatório.*
 
-`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - FORMATO DA RESPOSTA - 204`
+`GET /reports/pdf_to_mail?category_id=3 - REQUISIÇÃO`
 
-`GET /reports/pdf_to_mail/1 - FORMATO DA RESPOSTA - 204`
 
-`GET /reports/pdf_to_mail?year=2022&category_id=5 - FORMATO DA RESPOSTA - 204`
 
-`GET /reports/xls?year=2021 - FORMATO DA RESPOSTA - 204`
+## Obter relatório dos gastos por período.
 
-`GET /reports/xls?category_id=3 - FORMATO DA RESPOSTA - 204`
+`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
 
-`GET /reports/xls?initial_date=01/01/2021&final_date=06/05/2022 - FORMATO DA RESPOSTA - 204`
 
-`GET /reports/xls/1 - FORMATO DA RESPOSTA - 204`
 
-`GET /reports/xls?year=2022&category_id=5 - FORMATO DA RESPOSTA - 204`
+## Obter relatório dos gastos por ano e categoria específicos.
+*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/pdf_to_mail?year=2022&category_id=5 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por budget.
+*Recebe o id do budget que deseja gerar o relatório.*
+
+`GET /reports/pdf_to_mail/1 - REQUISIÇÃO`
+
+
+# *Apenas tabela*
+
+## Obter relatório dos gastos por ano.
+*Recebe o ano que deseja gerar o relatório.*
+`GET /reports/xls_to_mail?year=2021 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por categoria.
+*Recebe o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/xls_to_mail?category_id=3 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por período.
+
+`GET /reports/xls_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por ano e categoria específicos.
+*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/xls_to_mail?year=2022&category_id=5 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por budget.
+*Recebe o id do budget que deseja gerar o relatório.*
+
+`GET /reports/xls_to_mail/1 - REQUISIÇÃO`
+
+#
+
+# Download de relatórios.
+## *Gráfico*
+
+## Obter relatório dos gastos por ano.
+*Recebe o ano que deseja gerar o relatório.*
+`GET /reports/pdf?year=2021 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por categoria.
+*Recebe o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/pdf?category_id=3 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por período.
+
+`GET /reports/pdf?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por ano e categoria específicos.
+*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/pdf?year=2022&category_id=5 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por budget.
+*Recebe o id do budget que deseja gerar o relatório.*
+
+`GET /reports/pdf/1 - REQUISIÇÃO`
+
+
+## *Tabela*
+
+## Obter relatório dos gastos por ano.
+*Recebe o ano que deseja gerar o relatório.*
+`GET /reports/xls?year=2021 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por categoria.
+*Recebe o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/xls?category_id=3 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por período.
+
+`GET /reports/xls?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
+
+
+
+## Obter relatório dos gastos por ano e categoria específicos.
+*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+
+`GET /reports/xls?year=2022&category_id=5 - REQUISIÇÃO`
+
+
+#
+
+## *Retorno das Rotas que foram Aceitas*
+
+`FORMATO DA RESPOSTA - 204`
 
 
 ```json
@@ -471,27 +568,9 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 
 #
 
-## Retorno das Rotas que foram Recusadas
+## *Retorno das Rotas que foram Recusadas*
 
-`GET /reports/pdf_to_mail?year=2020 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/pdf_to_mail?category_id=6 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/02/2021 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/pdf_to_mail/3 - FORMATO DE RESPOSTA - 204`
-
-`GET /reports/pdf_to_mail?year=2022&category_id=6 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/xls?year=2020 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/xls?category_id=6 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/xls?initial_date=01/01/2021&final_date=06/02/2021 - FORMATO DA RESPOSTA - 204`
-
-`GET /reports/xls/3 - FORMATO DE RESPOSTA - 204`
-
-`GET /reports/xls?year=2022&category_id=6 - FORMATO DA RESPOSTA - 204`
+`FORMATO DA RESPOSTA - 204`
 
 
 ```json
