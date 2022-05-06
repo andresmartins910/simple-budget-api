@@ -348,7 +348,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 
 *É necessário autenticação por Bearer Token.*
 
-`POST /categories/:id - FORMATO DA REQUISIÇÃO:`
+`PATCH /categories/:id - FORMATO DA REQUISIÇÃO:`
 
 ```json
 {
@@ -357,7 +357,7 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 }
 ```
 
-`POST /categories/:id - FORMATO DA RESPOSTA - STATUS 201:`
+`PATCH /categories/:id - FORMATO DA RESPOSTA - STATUS 201:`
 
 ```json
 {

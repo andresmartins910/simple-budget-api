@@ -122,7 +122,7 @@ def rel_pdf_time_month(payload, current_user):
         total_value += expense['amount']
         string_amount = f" R$ {float(expense['amount'])}"
         pdf.cell(45, 9, expense['name'], border=1)
-        pdf.cell(55, 9, str(expense['created_at']), border=1, ln=0, align='C')
+        pdf.cell(55, 9, dt.strftime(expense['created_at'], '%d/%m/%Y'), border=1, ln=0, align='C')
         pdf.cell(45, 9, string_amount, border=1, ln=0, align='C')
         pdf.cell(45, 9, expense['category'], border=1, ln=1)
         if pdf.get_y() > 250.00:
@@ -154,7 +154,7 @@ def rel_pdf_time_period(payload, current_user):
     pdf.set_font('Arial', 'B', 16)
     pdf.set_author(author= current_user['name'])
     TITLE = "RELATÓRIO - POR PERIDO"
-    TIME = f"{payload['initial_date']} - {payload['final_date']}"
+    TIME = f"{dt.strftime(payload['initial_date'], '%d/%m/%Y')} - {dt.strftime(payload['final_date'], '%d/%m/%Y')}"
 
     pdf.cell(22)
     pdf.cell(150, 10, TITLE, border=1, ln=1, align='C')
@@ -164,10 +164,10 @@ def rel_pdf_time_period(payload, current_user):
     pdf.ln(20)
 
     pdf.set_font('Arial', 'B', 11)
-    pdf.cell(40, 9, 'nome', border=1, ln=0, align='C')
-    pdf.cell(55, 9, 'data de criação', border=1, ln=0, align='C')
-    pdf.cell(40, 9, 'valor', border=1, ln=0, align='C')
-    pdf.cell(40, 9, 'categoria', border=1, ln=1, align='C')
+    pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
+    pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
+    pdf.cell(40, 9, 'Valor', border=1, ln=0, align='C')
+    pdf.cell(40, 9, 'Categoria', border=1, ln=1, align='C')
 
     total_value = 0
     pdf.set_font('Times', '', 11)
@@ -175,7 +175,7 @@ def rel_pdf_time_period(payload, current_user):
         total_value += expense['amount']
         string_amount = f" R$ {float(expense['amount'])}"
         pdf.cell(40, 9, expense['name'], border=1, ln=0)
-        pdf.cell(55, 9, str(expense['created_at']), border=1, ln=0, align='C')
+        pdf.cell(55, 9, dt.strftime(expense['created_at'], '%d/%m/%Y'), border=1, ln=0, align='C')
         pdf.cell(40, 9, string_amount, border=1, ln=0, align='C')
         pdf.cell(40, 9, expense['category'], border=1, ln=1)
         if pdf.get_y() > 250.00:
@@ -218,18 +218,18 @@ def rel_all_budget(payload, current_user):
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(175, 9, str(budget['month_year'])[:10], border=1, ln=1, align='C')
-        pdf.cell(40, 9, 'nome', border=1, ln=0, align='C')
-        pdf.cell(55, 9, 'data de criação', border=1, ln=0, align='C')
-        pdf.cell(40, 9, 'valor', border=1, ln=0, align='C')
-        pdf.cell(40, 9, 'categoria', border=1, ln=1, align='C')
+        pdf.cell(175, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=1, align='C')
+        pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
+        pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
+        pdf.cell(40, 9, 'Valor', border=1, ln=0, align='C')
+        pdf.cell(40, 9, 'Categoria', border=1, ln=1, align='C')
         pdf.set_font('Times', '', 11)
 
         for expense in budget['expenses']:
             total_value += expense['amount']
             string_amount = f" R$ {float(expense['amount'])}"
             pdf.cell(40, 9, expense['name'], border=1, ln=0)
-            pdf.cell(55, 9, str(expense['created_at']), border=1, ln=0, align='C')
+            pdf.cell(55, 9, dt.strftime(expense['created_at'], '%d/%m/%Y'), border=1, ln=0, align='C')
             pdf.cell(40, 9, string_amount, border=1, ln=0, align='C')
             pdf.cell(40, 9, expense['category'], border=1, ln=1)
             if pdf.get_y() > 250.00:
@@ -246,7 +246,7 @@ def rel_all_budget(payload, current_user):
     pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in payload['budgets']:
-        pdf.cell(40, 9, str(budget['month_year'])[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
@@ -288,17 +288,17 @@ def rel_by_category(payload, current_user):
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(135, 9, str(budget['month_year'])[:10], border=1, ln=1, align='C')
-        pdf.cell(40, 9, 'nome', border=1, ln=0, align='C')
-        pdf.cell(55, 9, 'data de criação', border=1, ln=0, align='C')
-        pdf.cell(40, 9, 'valor', border=1, ln=1, align='C')
+        pdf.cell(135, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=1, align='C')
+        pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
+        pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
+        pdf.cell(40, 9, 'Valor', border=1, ln=1, align='C')
         pdf.set_font('Times', '', 11)
 
         for expense in budget['expenses']:
             total_value += expense['amount']
             string_amount = f" R$ {float(expense['amount'])}"
             pdf.cell(40, 9, expense['name'], border=1, ln=0)
-            pdf.cell(55, 9, str(expense['created_at']), border=1, ln=0, align='C')
+            pdf.cell(55, 9, dt.strftime(expense['created_at'], '%d/%m/%Y'), border=1, ln=0, align='C')
             pdf.cell(40, 9, string_amount, border=1, ln=1, align='C')
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
@@ -314,7 +314,7 @@ def rel_by_category(payload, current_user):
     pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in all_budgets:
-        pdf.cell(40, 9, str(budget['month_year'])[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
@@ -356,17 +356,17 @@ def rel_by_category_year(payload, current_user):
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(135, 9, str(budget['month_year'])[:10], border=1, ln=1, align='C')
-        pdf.cell(40, 9, 'nome', border=1, ln=0, align='C')
-        pdf.cell(55, 9, 'data de criação', border=1, ln=0, align='C')
-        pdf.cell(40, 9, 'valor', border=1, ln=1, align='C')
+        pdf.cell(135, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=1, align='C')
+        pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
+        pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
+        pdf.cell(40, 9, 'Valor', border=1, ln=1, align='C')
         pdf.set_font('Times', '', 11)
 
         for expense in budget['expenses']:
             total_value += expense['amount']
             string_amount = f" R$ {float(expense['amount'])}"
             pdf.cell(40, 9, expense['name'], border=1, ln=0)
-            pdf.cell(55, 9, str(expense['created_at']), border=1, ln=0, align='C')
+            pdf.cell(55, 9, dt.strftime(expense['created_at'], '%d/%m/%Y'), border=1, ln=0, align='C')
             pdf.cell(40, 9, string_amount, border=1, ln=1, align='C')
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
@@ -382,7 +382,7 @@ def rel_by_category_year(payload, current_user):
     pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in all_budgets:
-        pdf.cell(40, 9, str(budget['month_year'])[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
