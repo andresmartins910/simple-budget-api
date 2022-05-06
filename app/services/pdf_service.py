@@ -218,7 +218,7 @@ def rel_all_budget(payload, current_user):
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(175, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=1, align='C')
+        pdf.cell(175, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=1, align='C')
         pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
         pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
         pdf.cell(40, 9, 'Valor', border=1, ln=0, align='C')
@@ -246,7 +246,7 @@ def rel_all_budget(payload, current_user):
     pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in payload['budgets']:
-        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
@@ -288,7 +288,7 @@ def rel_by_category(payload, current_user):
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(135, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=1, align='C')
+        pdf.cell(135, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=1, align='C')
         pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
         pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
         pdf.cell(40, 9, 'Valor', border=1, ln=1, align='C')
@@ -314,7 +314,7 @@ def rel_by_category(payload, current_user):
     pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in all_budgets:
-        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
@@ -356,7 +356,7 @@ def rel_by_category_year(payload, current_user):
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(135, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=1, align='C')
+        pdf.cell(135, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=1, align='C')
         pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
         pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
         pdf.cell(40, 9, 'Valor', border=1, ln=1, align='C')
@@ -382,7 +382,7 @@ def rel_by_category_year(payload, current_user):
     pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in all_budgets:
-        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"))[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
