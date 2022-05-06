@@ -412,7 +412,90 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 `DELETE /categories/:id - FORMATO DA RESPOSTA - STATUS 204:`
 
 ```json
-    	"No body returned for response"
+	"No body returned for response"
 ```
 
 # Reports
+
+## Requisições
+
+`GET /reports/pdf_to_mail?year=2021 - REQUISIÇÃO`
+
+`GET /reports/pdf_to_mail?category_id=3 - REQUISIÇÃO`
+
+`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
+
+`GET /reports/pdf_to_mail/1 - REQUISIÇÃO`
+
+`GET /reports/pdf_to_mail?year=2022&category_id=5 - REQUISIÇÃO`
+
+`GET /reports/xls?year=2021 - REQUISIÇÃO`
+
+`GET /reports/xls?category_id=3 - REQUISIÇÃO`
+
+`GET /reports/xls?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
+
+`GET /reports/xls/1 - REQUISIÇÃO`
+
+`GET /reports/xls?year=2022&category_id=5 - REQUISIÇÃO`
+
+#
+
+## Retorno das Rotas que foram Aceitas
+
+
+`GET /reports/pdf_to_mail?year=2021 - FORMATO DA RESPOSTA - 204` 
+
+`GET /reports/pdf_to_mail?category_id=3 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail/1 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail?year=2022&category_id=5 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?year=2021 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?category_id=3 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?initial_date=01/01/2021&final_date=06/05/2022 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls/1 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?year=2022&category_id=5 - FORMATO DA RESPOSTA - 204`
+
+
+```json
+	"No body returned for response"
+```
+
+#
+
+## Retorno das Rotas que foram Recusadas
+
+`GET /reports/pdf_to_mail?year=2020 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail?category_id=6 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/02/2021 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail/3 - FORMATO DE RESPOSTA - 204`
+
+`GET /reports/pdf_to_mail?year=2022&category_id=6 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?year=2020 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?category_id=6 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls?initial_date=01/01/2021&final_date=06/02/2021 - FORMATO DA RESPOSTA - 204`
+
+`GET /reports/xls/3 - FORMATO DE RESPOSTA - 204`
+
+`GET /reports/xls?year=2022&category_id=6 - FORMATO DA RESPOSTA - 204`
+
+
+```json
+{
+	"error": "Insufficient data"
+}
+```
