@@ -35,7 +35,7 @@ def verify_allowed_keys(data, allowed_keys):
             raise KeyError(err_missing_key)
 
 
-def send_mail(mail_to_send, subject):
+def send_mail(mail_to_send, subject, attachments):
 
     # VARIAVEIS DE AMBIENTE
     fromaddr = os.getenv('APP_MAIL')
@@ -61,15 +61,17 @@ def send_mail(mail_to_send, subject):
     """
     email.attach(MIMEText(message, "plain"))
 
-    # ANEXA O ARQUIVO
-    filename = 'report.pdf'
-    path = f'app/reports_temp/{filename}'
+    for item in attachments:
 
-    attachment = open(path, 'rb')
-    x = MIMEApplication(attachment.read(), Name=filename)
-    encoders.encode_base64(x)
-    x.add_header('Content-Disposition', 'attachment', filename=filename)
-    email.attach(x)
+        # ANEXA O(S) ARQUIVO(S)
+        filename = item
+        path = f'app/reports_temp/{filename}'
+
+        attachment = open(path, 'rb')
+        x = MIMEApplication(attachment.read(), Name=filename)
+        encoders.encode_base64(x)
+        x.add_header('Content-Disposition', 'attachment', filename=filename)
+        email.attach(x)
 
     # ENVIO
     mailer = smtplib.SMTP(mail_host, mail_port)

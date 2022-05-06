@@ -1,5 +1,3 @@
-import json
-import os
 from datetime import datetime as dt
 from http import HTTPStatus
 
@@ -8,22 +6,21 @@ from app.models.budgets_model import BudgetModel
 from app.models.categories_model import CategoryModel
 from app.models.expenses_model import ExpenseModel
 from app.models.users_model import UserModel
+from app.services.json_to_excel import json_to_excel
 from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
-
-from sqlalchemy import func, or_
 from sqlalchemy.orm import Query, Session
 
-from ..services import download_file
-from ..services import send_mail
-from ..services.pdf_service import normalize_amount
-from ..services.pdf_service import create_pdf
+from ..services import download_file, send_mail
+from ..services.pdf_service import (create_pdf, normalize_amount,
+                                    rel_all_budget, rel_by_category,
+                                    rel_by_category_year, rel_pdf_time_month,
+                                    rel_pdf_time_period, rel_pdf_time_year)
 
-from ..services.pdf_service import rel_pdf_time_month, rel_pdf_time_period, rel_pdf_time_year
-from ..services.pdf_service import rel_all_budget, rel_by_category, rel_by_category_year
 
+# FUNÇÕES DE DISTRIBUIDORAS
 
 @jwt_required()
 def download_xlsx():
@@ -76,20 +73,70 @@ def download_pdf_budget_id(budget_id):
 @jwt_required()
 def email_xlsx():
 
-    ...
+    current_user = get_jwt_identity()
+    attachments = ['report.xlsx']
+
+    try:
+        subject = report_with_filter()
+        pdf_chart_to_mail()
+
+        send_mail(current_user['email'], subject, attachments)
+
+        return "", HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
 @jwt_required()
 def email_xlsx_budget_id(budget_id):
 
-    ...
+    session: Session = db.session()
+
+    registers: BaseQuery = session.query(ExpenseModel)
+    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
+
+    if not budget:
+        return {"error": "No data found in database"}
+
+    current_user = get_jwt_identity()
+
+    registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(ExpenseModel.budget_id == budget_id)
+            .filter(BudgetModel.id == budget_id)
+            .filter(UserModel.id == current_user['id'])
+            .all()
+        )
+
+    subject = f'Mensal - {budget.month_year}'
+    attachments = ['report.xlsx']
+
+    try:
+        report_with_filter_by_budget(registers, budget, current_user)
+
+        send_mail(current_user['email'], subject, attachments)
+
+        return "", HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
 @jwt_required()
 def email_pdf():
 
+    current_user = get_jwt_identity()
+    attachments = ['report.pdf', 'chart_report.pdf']
 
     try:
-        # subject = report_with_filters_to_pdf(registers, current_user, budget)
+        subject = report_with_filters_to_pdf()
         pdf_chart_to_mail()
-        send_mail("brunobgr0810@gmail.com", "teste")
-        # send_mail(current_user['email'], subject)
+
+        send_mail(current_user['email'], subject, attachments)
 
         return "", HTTPStatus.NO_CONTENT
 
@@ -120,12 +167,15 @@ def email_pdf_budget_id(budget_id):
             .filter(UserModel.id == current_user['id'])
             .all()
         )
+
     subject = f'Mensal - {budget.month_year}'
+    attachments = ['report.pdf', 'chart_report.pdf']
+
     try:
-        # report_with_filter_by_budget_to_pdf(registers, current_user, budget)
+        report_with_filter_by_budget_to_pdf(registers, current_user, budget)
         pdf_chart_to_mail_by_budget_id(registers, budget)
-        send_mail("brunobgr0810@gmail.com", subject)
-        # send_mail(current_user['email'], subject)
+
+        send_mail(current_user['email'], subject, attachments)
 
         return "", HTTPStatus.NO_CONTENT
 
@@ -137,18 +187,9 @@ def email_pdf_budget_id(budget_id):
 
 
 
-def download():
+# FUNÇÕES DE QUERIES
 
-    file_name = ""
 
-    try:
-        downloaded_file = download_file(file_name)
-    except FileNotFoundError as e_not_found:
-        return e_not_found.args[0], HTTPStatus.NOT_FOUND
-
-    return downloaded_file, HTTPStatus.OK
-
-@jwt_required()
 def report_with_filter():
 
     session: Session = current_app.db.session
@@ -163,6 +204,8 @@ def report_with_filter():
     final_date = request.args.get("final_date", type=str)
 
     if not year and not category_id and not initial_date and not final_date:
+
+        subject = f"Completo - {current_user['name']}"
 
         session: Session = current_app.db.session
 
@@ -225,6 +268,8 @@ def report_with_filter():
         except:
             return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
 
+        subject = f"Anual - {year}"
+
         years_first_day = f"01/01/{year}"
         years_last_day = f"31/12/{year}"
 
@@ -259,7 +304,6 @@ def report_with_filter():
             "expenses": expenses
         }
 
-
     elif category_id and not year and not initial_date and not final_date:
 
         session: Session = db.session
@@ -268,6 +312,8 @@ def report_with_filter():
 
         if not category:
             return {"error": "category not found."}, HTTPStatus.BAD_REQUEST
+
+        subject = f"Por Categoria - {category.name}"
 
         registers: Query = (
             registers
@@ -314,6 +360,8 @@ def report_with_filter():
         except:
             return {"error": "year must be format 'YYYY'."}, HTTPStatus.BAD_REQUEST
 
+        subject = f"Por ano e categoria - {year}/{category.name}"
+
         years_first_day = f"01/01/{year}"
         years_last_day = f"31/12/{year}"
 
@@ -359,6 +407,8 @@ def report_with_filter():
         except:
             return {"error": "start and end dates must be format 'dd/mm/YYYY'."}, HTTPStatus.BAD_REQUEST
 
+        subject = f"por Período - {initial_date}-{final_date}"
+
         registers: Query = (
             registers
             .select_from(ExpenseModel)
@@ -394,30 +444,12 @@ def report_with_filter():
     else:
         return jsonify({"error": "This request is not allowed."}), HTTPStatus.BAD_REQUEST
 
-    return jsonify(data_return), HTTPStatus.OK
+    json_to_excel(data_return)
 
-@jwt_required()
-def report_with_filter_by_budget(budget_id):
-    session: Session = db.session()
+    return subject
 
-    registers: BaseQuery = session.query(ExpenseModel)
-    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
 
-    if not budget:
-        return {"error": "no data found in database"}
-
-    current_user = get_jwt_identity()
-
-    registers: Query = (
-            registers
-            .select_from(ExpenseModel)
-            .join(BudgetModel)
-            .join(UserModel)
-            .filter(ExpenseModel.budget_id == budget_id)
-            .filter(BudgetModel.id == budget_id)
-            .filter(UserModel.id == current_user['id'])
-            .all()
-        )
+def report_with_filter_by_budget(registers, budget, current_user):
 
     expenses = []
 
@@ -437,7 +469,7 @@ def report_with_filter_by_budget(budget_id):
         "expenses": expenses
     }
 
-    return jsonify(data_return), HTTPStatus.OK
+    json_to_excel(data_return)
 
 
 def report_with_filters_to_pdf():
@@ -511,10 +543,13 @@ def report_with_filters_to_pdf():
 
         subject = f"Anual - {year}"
 
+        years_first_day = f"01/01/{year}"
+        years_last_day = f"31/12/{year}"
+
         registers: Query = (
-            expenses_registers
-            .select_from(ExpenseModel)
-            .join(BudgetModel)
+            budgets_registers
+            .select_from(BudgetModel)
+            .join(ExpenseModel)
             .join(UserModel)
             .filter(UserModel.id == current_user['id'])
             .all()
@@ -522,30 +557,28 @@ def report_with_filters_to_pdf():
 
         budgets = []
 
-        for expense in registers:
+        for budget in registers:
 
-            year_validate = dt.strptime(expense.budget.month_year, "%m/%Y").strftime("%Y")
+            valid_year = dt.strptime(budget.month_year, "%m/%Y").strftime("%Y")
 
-            if year_validate == year:
+            if valid_year == year:
 
                 new_budget = {
-                                "month_year": dt.strptime(expense.budget.month_year, "%m/%Y"),
+                                "month_year": dt.strptime(budget.month_year, "%m/%Y"),
                                 "expenses": []
                             }
 
-                for expense in registers:
+                for expense in budget.expenses:
 
-                    if dt.strptime(expense.budget.month_year, "%m/%Y") == new_budget['month_year']:
+                    new_expense = {
+                                "name": expense.name,
+                                "description": expense.description,
+                                "amount": expense.amount,
+                                "created_at": expense.created_at,
+                                "category": expense.category.name
+                            }
 
-                        new_expense = {
-                                    "name": expense.name,
-                                    "description": expense.description,
-                                    "amount": expense.amount,
-                                    "created_at": expense.created_at,
-                                    "category": expense.category.name
-                                }
-
-                        new_budget["expenses"].append(new_expense)
+                    new_budget["expenses"].append(new_expense)
 
                 budgets.append(new_budget)
 
@@ -727,6 +760,7 @@ def report_with_filters_to_pdf():
         rel_pdf_time_period(data_return, current_user)
 
         return subject
+
 
     else:
         return jsonify({"error": "This request is not allowed."}), HTTPStatus.BAD_REQUEST
@@ -993,8 +1027,5 @@ def pdf_chart_to_mail_by_budget_id(registers, budget):
     return {
         "error": "Insufficient data"
     }, HTTPStatus.BAD_REQUEST
-
-
-
 
 

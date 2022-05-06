@@ -3,12 +3,14 @@ import os
 from fpdf import FPDF
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from datetime import datetime as dt
 
 
 REPORTS_TEMP = os.getenv("REPORTS_TEMP")
 
 
 def rel_pdf_time_year(payload, current_user):
+
     pdf = FPDF('P', 'mm', 'A4')
 
     pdf.add_page()
@@ -18,9 +20,10 @@ def rel_pdf_time_year(payload, current_user):
 
     WIDTH = 210
     HEIGHT = 297
-    TITLE = "RELATÓRIO - POR ANO"
+    TITLE = "RELATÓRIO - ANUAL"
 
     # titulo
+
     pdf.cell(22)
     pdf.cell(150, 10, TITLE, border=1, ln=1, align='C')
     pdf.cell(82)
@@ -31,14 +34,16 @@ def rel_pdf_time_year(payload, current_user):
     all_budgets = payload['budgets']
 
     total_value = 0
+
     for budget in all_budgets:
         if pdf.get_x() > 250:
             pdf.ln(15)
         pdf.set_font('Arial', 'B', 11)
-        pdf.cell(135, 9, str(budget['month_year'])[:10], border=1, ln=1, align='C')
-        pdf.cell(40, 9, 'nome', border=1, ln=0, align='C')
-        pdf.cell(55, 9, 'data de criação', border=1, ln=0, align='C')
-        pdf.cell(40, 9, 'valor', border=1, ln=1, align='C')
+        pdf.cell(180, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=1, align='C')
+        pdf.cell(40, 9, 'Nome', border=1, ln=0, align='C')
+        pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
+        pdf.cell(40, 9, 'Valor', border=1, ln=0, align='C')
+        pdf.cell(45, 9, 'Categoria', border=1, ln=1, align='C')
         pdf.set_font('Times', '', 11)
 
         for expense in budget['expenses']:
@@ -46,8 +51,8 @@ def rel_pdf_time_year(payload, current_user):
             total_value += expense['amount']
             string_amount = f" R$ {float(expense['amount'])}"
             pdf.cell(40, 9, expense['name'], border=1, ln=0)
-            pdf.cell(55, 9, str(expense['created_at']), border=1, ln=0, align='C')
-            pdf.cell(40, 9, string_amount, border=1, ln=1, align='C')
+            pdf.cell(55, 9, dt.strftime((expense['created_at']), "%d/%m/%Y"), border=1, ln=0, align='C')
+            pdf.cell(40, 9, string_amount, border=1, ln=0, align='C')
             pdf.cell(45, 9, expense['category'], border=1, ln=1)
             if pdf.get_y() > 250.00:
                 pdf.ln(10)
@@ -56,14 +61,14 @@ def rel_pdf_time_year(payload, current_user):
     # TOTAL DE GASTOS
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 11)
-    pdf.cell(40, 8, f"Total de gastos: ", border="B", ln=0)
+    pdf.cell(40, 8, f"Total de Gastos: ", border="B", ln=0)
     pdf.cell(30, 8, f"{total_value}", border='B', ln=0, align='C')
     pdf.ln(10)
 
-    pdf.cell(10, 10, f"Lista de budgets abordados", ln=1)
+    pdf.cell(10, 10, f"Lista de Budgets abordados", ln=1)
     pdf.set_font('Times', '', 11)
     for budget in all_budgets:
-        pdf.cell(40, 9, str(budget['month_year'])[:10], border=1, ln=0, align='C')
+        pdf.cell(40, 9, dt.strftime((budget['month_year']), "%B/%Y"), border=1, ln=0, align='C')
         pdf.cell(1)
         if pdf.get_x() > 170:
             pdf.set_y(pdf.get_y()+10)
@@ -72,7 +77,7 @@ def rel_pdf_time_year(payload, current_user):
 
     # DADOS DO USUARIO
     pdf.set_font('Arial', 'B', 11)
-    pdf.cell(70, 10, f"Dados do usuário", ln=1)
+    pdf.cell(70, 10, f"Dados do Usuário", ln=1)
     pdf.set_font('Times', '', 11)
     pdf.cell(70, 10, f"Nome: {current_user['name']}", border=1, ln=1)
     pdf.cell(70, 10, f"Email: {current_user['email']}", border=1, ln=1)
@@ -87,14 +92,14 @@ def rel_pdf_time_month(payload, current_user):
     pdf.add_page()
     pdf.set_font('Arial', 'B', 16)
     pdf.set_author(author= current_user['name'])
-    TITLE = "RELATÓRIO - POR MÊS"
+    TITLE = "RELATÓRIO - MENSAL"
 
 
     # titulo
     pdf.cell(22)
     pdf.cell(150, 10, TITLE, border=1, ln=1, align='C')
     pdf.cell(60)
-    pdf.cell(60, 7, f"mês de referencia: {payload['budget']}")
+    pdf.cell(60, 7, f"Mês de referencia: {payload['budget']}")
     pdf.line(10, 30, 200, 30)
     pdf.ln(20)
 
@@ -105,10 +110,10 @@ def rel_pdf_time_month(payload, current_user):
 
     # COLUNAS
     pdf.set_font('Arial', 'B', 11)
-    pdf.cell(45, 9, 'nome', border=1, ln=0, align='C')
-    pdf.cell(55, 9, 'data de criação', border=1, ln=0, align='C')
-    pdf.cell(45, 9, 'valor', border=1, ln=0, align='C')
-    pdf.cell(45, 9, 'categoria', border=1, ln=1, align='C')
+    pdf.cell(45, 9, 'Nome', border=1, ln=0, align='C')
+    pdf.cell(55, 9, 'Data de criação', border=1, ln=0, align='C')
+    pdf.cell(45, 9, 'Valor', border=1, ln=0, align='C')
+    pdf.cell(45, 9, 'Categoria', border=1, ln=1, align='C')
 
     # EXPENSES
     pdf.set_font('Times', '', 11)
@@ -127,13 +132,13 @@ def rel_pdf_time_month(payload, current_user):
     # TOTAL DE GASTOS
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 11)
-    pdf.cell(40, 8, f"Total de gastos: ", border="B", ln=0)
+    pdf.cell(40, 8, f"Total de Gastos: ", border="B", ln=0)
     pdf.cell(30, 8, f"{total_value}", border='B', ln=0, align='C')
     pdf.ln(10)
 
     # DADOS DO USUARIO
     pdf.set_font('Arial', 'B', 11)
-    pdf.cell(70, 10, f"Dados do usuário", ln=1)
+    pdf.cell(70, 10, f"Dados do Usuário", ln=1)
     pdf.set_font('Times', '', 11)
     pdf.cell(70, 10, f"Nome: {current_user['name']}", border=1, ln=1)
     pdf.cell(70, 10, f"Email: {current_user['email']}", border=1, ln=1)
