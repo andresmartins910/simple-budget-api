@@ -5,9 +5,14 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from flask import send_file, send_from_directory
+from dotenv import load_dotenv
+
+from flask import Flask, current_app, send_file, send_from_directory
+
+load_dotenv()
 
 FILES_DIRECTORY = 'reports_temp'
+
 ALLOWED_EXTENSIONS = ['xlsx', 'pdf']
 
 
@@ -82,21 +87,23 @@ def send_mail(mail_to_send, subject, attachments):
     mailer.quit()
 
 
-def download_file(file_name:str):
+def download_file(file_list:list):
 
-    file_path = f'{FILES_DIRECTORY}/{file_name}'
+    for file_name in file_list:
 
-    if not verify_existing_file(file_name):
-        raise FileNotFoundError(
-            {
-                "error": "File not found!"
-            }
-        )
-    return send_from_directory(
-        directory="/reports_temp/report.pdf",
-        path=file_name,
-        as_attachment=True
-    )
+        if not verify_existing_file(file_name):
+            raise FileNotFoundError(
+                {
+                    "error": "File not found!"
+                }
+            )
+
+        download_folder = os.getenv('REPORTS_TEMP')
+
+        file_path = os.path.join(download_folder, file_name)
+        path_abs = os.path.abspath(file_path)
+
+        return send_file(path_abs, as_attachment=True)
 
 
 def verify_existing_file(file_name:str):

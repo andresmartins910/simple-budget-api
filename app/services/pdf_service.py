@@ -433,9 +433,12 @@ def create_pdf(categories, amount, title, xlabel):
 
     with PdfPages(f"app/{REPORTS_TEMP}/chart_report.pdf") as pdf:
 
+        plt.rcParams["figure.figsize"] = (7, 6)
         plt.bar(categories, amount)
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel("Despesas", fontsize=12)
+
+        plt.xticks(categories, rotation=20)
 
         plt.title(title)
 

@@ -1,6 +1,8 @@
 from datetime import datetime as dt
 from http import HTTPStatus
 
+from weasyprint import Attachment
+
 from app.configs.database import db
 from app.models.budgets_model import BudgetModel
 from app.models.categories_model import CategoryModel
@@ -8,7 +10,7 @@ from app.models.expenses_model import ExpenseModel
 from app.models.users_model import UserModel
 from app.services.json_to_excel import json_to_excel
 from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, request, send_from_directory, send_file
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy.orm import Query, Session
@@ -25,18 +27,21 @@ from ..services.pdf_service import (create_pdf, normalize_amount,
 @jwt_required()
 def download_xlsx():
 
-    ...
+    current_user = get_jwt_identity()
+    attachments = ['report.xlsx']
+
+    try:
+        subject = report_with_filter()
+        pdf_chart_to_mail()
+
+        return download_file(attachments), HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
 @jwt_required()
 def download_xlsx_budget_id(budget_id):
-
-    ...
-@jwt_required()
-def download_pdf():
-
-    ...
-@jwt_required()
-def download_pdf_budget_id(budget_id):
-
 
     session: Session = db.session()
 
@@ -44,7 +49,7 @@ def download_pdf_budget_id(budget_id):
     budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
 
     if not budget:
-        return {"error": "Budget not found!"}, HTTPStatus.NOT_FOUND
+        return {"error": "No data found in database"}
 
     current_user = get_jwt_identity()
 
@@ -59,12 +64,65 @@ def download_pdf_budget_id(budget_id):
             .all()
         )
 
-    try:
-        # report_with_filter_by_budget_to_pdf(registers, current_user, budget)
-        # pdf_chart_to_mail_by_budget_id(registers, budget)
-        download_file("report.pdf")
+    subject = f'Mensal - {budget.month_year}'
+    attachments = ['report.xlsx']
 
-        return "", HTTPStatus.NO_CONTENT
+    try:
+        report_with_filter_by_budget(registers, budget, current_user)
+
+        return download_file(attachments), HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@jwt_required()
+def download_pdf():
+
+    current_user = get_jwt_identity()
+    attachments = ['report.pdf', 'chart_report.pdf']
+
+    try:
+        subject = report_with_filters_to_pdf()
+        pdf_chart_to_mail()
+
+        return download_file(attachments), HTTPStatus.NO_CONTENT
+
+    except:
+        return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@jwt_required()
+def download_pdf_budget_id(budget_id):
+
+    session: Session = db.session()
+
+    registers: BaseQuery = session.query(ExpenseModel)
+    budget: BudgetModel = BudgetModel.query.filter_by(id=budget_id).first()
+
+    if not budget:
+        return {"error": "Budget not found!"}, HTTPStatus.NOT_FOUND
+
+    current_user = get_jwt_identity()
+
+    attachments = ['report.pdf', 'chart_report.pdf']
+
+    registers: Query = (
+            registers
+            .select_from(ExpenseModel)
+            .join(BudgetModel)
+            .join(UserModel)
+            .filter(ExpenseModel.budget_id == budget_id)
+            .filter(BudgetModel.id == budget_id)
+            .filter(UserModel.id == current_user['id'])
+            .all()
+        )
+
+    try:
+        report_with_filter_by_budget_to_pdf(registers, current_user, budget)
+        pdf_chart_to_mail_by_budget_id(registers, budget)
+
+        return download_file(attachments), HTTPStatus.NO_CONTENT
 
     except:
         return {"Error": "Erro ao gerar os relatórios ou enviar email"}, HTTPStatus.INTERNAL_SERVER_ERROR
