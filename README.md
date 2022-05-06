@@ -416,144 +416,156 @@ URL base: [https://simple-budget-api.herokuapp.com/](https://simple-budget-api.h
 ```
 
 # Reports
-*É necessário autenticação por Bearer Token em TODAS as rotas de reports. Não possui corpo de requisição.*
-*Filtragem de reports através de query params*
-
-
-# Envio de relatórios PDF por email.
+* É necessário autenticação por Bearer Token em TODAS as rotas de reports. Não possui corpo de requisição.
+* Filtragem de reports através de query params
 
 #
 
-# *Gráfico e tabela*
+## Envio de relatórios PDF por email:
+### *Email gráfico e tabela:*
 
-## Obter relatório dos gastos por ano.
-*Recebe o ano que deseja gerar o relatório.*
+#
+
+### Obter relatório dos gastos por ano.
+> *Recebe o ano que deseja gerar o relatório.*
+
 `GET /reports/pdf_to_mail?year=2021 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por categoria.
-*Recebe o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por categoria.
+> *Recebe o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/pdf_to_mail?category_id=3 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por período.
+### Obter relatório dos gastos por período.
+> *Recebe o período que deseja gerar o relatório.*
 
 `GET /reports/pdf_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por ano e categoria específicos.
-*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano e categoria específicos.
+> *Recebe o ano e o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/pdf_to_mail?year=2022&category_id=5 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por budget.
-*Recebe o id do budget que deseja gerar o relatório.*
+### Obter relatório dos gastos por budget.
+> *Recebe o id do budget que deseja gerar o relatório.*
 
 `GET /reports/pdf_to_mail/1 - REQUISIÇÃO`
 
+#
 
-# *Apenas tabela*
+### *Email apenas tabela:*
+#
 
-## Obter relatório dos gastos por ano.
-*Recebe o ano que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano.
+> *Recebe o ano que deseja gerar o relatório.*
+
 `GET /reports/xls_to_mail?year=2021 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por categoria.
-*Recebe o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por categoria.
+> *Recebe o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/xls_to_mail?category_id=3 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por período.
+### Obter relatório dos gastos por período.
+> *Recebe o período que deseja gerar o relatório.*
 
 `GET /reports/xls_to_mail?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por ano e categoria específicos.
-*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano e categoria específicos.
+> *Recebe o ano e o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/xls_to_mail?year=2022&category_id=5 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por budget.
-*Recebe o id do budget que deseja gerar o relatório.*
+### Obter relatório dos gastos por budget.
+> *Recebe o id do budget que deseja gerar o relatório.*
 
 `GET /reports/xls_to_mail/1 - REQUISIÇÃO`
 
 #
 
-# Download de relatórios.
-## *Gráfico*
+## Download de relatórios:
+### *Download gráfico:*
+#
 
-## Obter relatório dos gastos por ano.
-*Recebe o ano que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano.
+> *Recebe o ano que deseja gerar o relatório.*
+
 `GET /reports/pdf?year=2021 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por categoria.
-*Recebe o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por categoria.
+> *Recebe o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/pdf?category_id=3 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por período.
+### Obter relatório dos gastos por período.
+> *Recebe o período que deseja gerar o relatório.*
 
 `GET /reports/pdf?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por ano e categoria específicos.
-*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano e categoria específicos.
+> *Recebe o ano e o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/pdf?year=2022&category_id=5 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por budget.
-*Recebe o id do budget que deseja gerar o relatório.*
+### Obter relatório dos gastos por budget.
+> *Recebe o id do budget que deseja gerar o relatório.*
 
 `GET /reports/pdf/1 - REQUISIÇÃO`
 
+#
 
-## *Tabela*
+### *Download tabela:*
+#
 
-## Obter relatório dos gastos por ano.
-*Recebe o ano que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano.
+> *Recebe o ano que deseja gerar o relatório.*
+
 `GET /reports/xls?year=2021 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por categoria.
-*Recebe o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por categoria.
+> *Recebe o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/xls?category_id=3 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por período.
+### Obter relatório dos gastos por período.
+> *Recebe o período que deseja gerar o relatório.*
 
 `GET /reports/xls?initial_date=01/01/2021&final_date=06/05/2022 - REQUISIÇÃO`
 
+#
 
-
-## Obter relatório dos gastos por ano e categoria específicos.
-*Recebe o ano e o id da categoria que deseja gerar o relatório.*
+### Obter relatório dos gastos por ano e categoria específicos.
+> *Recebe o ano e o id da categoria que deseja gerar o relatório.*
 
 `GET /reports/xls?year=2022&category_id=5 - REQUISIÇÃO`
-
 
 #
 
