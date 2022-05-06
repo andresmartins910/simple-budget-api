@@ -1,8 +1,6 @@
 from datetime import datetime as dt
 from http import HTTPStatus
 
-from weasyprint import Attachment
-
 from app.configs.database import db
 from app.models.budgets_model import BudgetModel
 from app.models.categories_model import CategoryModel
@@ -10,7 +8,7 @@ from app.models.expenses_model import ExpenseModel
 from app.models.users_model import UserModel
 from app.services.json_to_excel import json_to_excel
 from app.services.pdf_service import rel_all_budget, rel_pdf_time_year
-from flask import current_app, jsonify, request, send_from_directory, send_file
+from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy.orm import Query, Session
@@ -20,7 +18,6 @@ from ..services.pdf_service import (create_pdf, normalize_amount,
                                     rel_all_budget, rel_by_category,
                                     rel_by_category_year, rel_pdf_time_month,
                                     rel_pdf_time_period, rel_pdf_time_year)
-
 
 # FUNÇÕES DE DISTRIBUIDORAS
 
@@ -1051,6 +1048,7 @@ def pdf_chart_to_mail():
 
 
             if(len(categories) > 0 and len(new_amount) > 0):
+
                 create_pdf(categories, new_amount, title, xlabel)
 
                 return "", HTTPStatus.NO_CONTENT
@@ -1085,5 +1083,4 @@ def pdf_chart_to_mail_by_budget_id(registers, budget):
     return {
         "error": "Insufficient data"
     }, HTTPStatus.BAD_REQUEST
-
 
